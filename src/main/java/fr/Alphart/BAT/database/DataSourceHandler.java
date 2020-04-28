@@ -153,7 +153,6 @@ public class DataSourceHandler {
 
 	/**
 	 * Generate a backup of the BAT data in mysql database.
-	 * @param path
 	 * @param onComplete
 	 * @throws RuntimeException if MySQL is not used or if the creation of the backup file failed
 	 */

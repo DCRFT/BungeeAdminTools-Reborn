@@ -59,7 +59,7 @@ public abstract class ModuleConfiguration extends YamlConfig {
 	/**
 	 * Add commands provided by this module into the configuration file
 	 * 
-	 * @param commands
+	 * @param cmds
 	 *            list
 	 */
 	public void setProvidedCmds(final List<String> cmds) {

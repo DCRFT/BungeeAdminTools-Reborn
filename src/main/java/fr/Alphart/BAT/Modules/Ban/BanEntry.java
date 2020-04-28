@@ -1,7 +1,6 @@
 package fr.Alphart.BAT.Modules.Ban;
 
 import java.sql.Timestamp;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

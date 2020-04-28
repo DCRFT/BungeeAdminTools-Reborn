@@ -171,8 +171,8 @@ public class Kick implements IModule {
 	 * Get all kick data of a player <br>
 	 * <b>Should be runned async to optimize performance</b>
 	 * 
-	 * @param player
-	 *            's name
+	 * @param pName
+	 *            Player's name
 	 * @return List of KickEntry of the player
 	 */
 	public List<KickEntry> getKickData(final String pName) {
