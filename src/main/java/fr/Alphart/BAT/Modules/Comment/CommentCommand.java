@@ -32,7 +32,7 @@ public class CommentCommand extends CommandHandler{
 	@RunAsync
 	public static class AddCommentCmd extends BATCommand{
 		public AddCommentCmd() { 
-			super("comment", "<entity> <reason>", "Write a comment about the player.", "bat.comment.create", "note");
+			super("addcomment", "<entity> <reason>", "Write a comment about the player.", "bat.comment.create", "note");
 			// We need this command to handle the /comment help
 			setMinArgs(1);
 		}

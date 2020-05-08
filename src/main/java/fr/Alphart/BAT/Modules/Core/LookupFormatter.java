@@ -142,7 +142,11 @@ public class LookupFormatter {
         final String last_ip = !"0.0.0.0".equals(pDetails.getLastIP())
                 ? ((displayIP) ? pDetails.getLastIP() : _("hiddenIp"))
                 : _("unknownIp");
-                
+
+        final String ip_users = !ipDetails.getUsers().isEmpty()
+                ? Joiner.on(joinChar).join(ipDetails.getUsers())
+                : _("none");
+
         String name_history_list;
         // Create a function for that or something better than a big chunk of code inside the lookup
         if(ProxyServer.getInstance().getConfig().isOnlineMode()){
@@ -173,7 +177,7 @@ public class LookupFormatter {
             }
             int i = 0;
             for(final CommentEntry comm : pDetails.getComments()){
-                last_comments += _("commentRow", new String[]{String.valueOf(comm.getID()), 
+                last_comments += _("commentRowShort", new String[]{String.valueOf(comm.getID()),
                         (comm.getType() == Type.NOTE) ? "&eComment" : "&cWarning", comm.getContent(),
                         comm.getFormattedDate(), comm.getAuthor()});
                 i++;
@@ -182,7 +186,7 @@ public class LookupFormatter {
                 }
             }
             if(last_comments.isEmpty()){
-                last_comments = _("none");
+                last_comments = _("none\n");
             }
         }catch(final NumberFormatException e){
             last_comments = "Unable to parse the number of last_comments";
@@ -190,16 +194,26 @@ public class LookupFormatter {
         
         final List<BaseComponent[]> finalMessage = FormatUtils.formatNewLine(ChatColor.translateAlternateColorCodes('&',
                 lookupPattern
-                .replace("{connection_state}", connection_state)
-                .replace("{ban_servers}", ban_servers).replace("{banip_servers}", banip_servers)
-                .replace("{mute_servers}", mute_servers).replace("{muteip_servers}", muteip_servers)
-                .replace("{first_login}", first_login).replace("{last_login}", last_login).replace("{last_ip}", last_ip)
-                .replace("{bans_number}", String.valueOf(bansNumber)).replace("{mutes_number}", String.valueOf(mutesNumber))
-                .replace("{kicks_number}", String.valueOf(kicksNumber)).replace("{comments_number}", String.valueOf(commentsNumber))
-                .replace("{name_history_list}", name_history_list).replaceAll("\\{last_comments:\\d\\}", last_comments)
-                .replace("{player}", pName).replace("{uuid}", Core.getUUID(pName))
-                // '¤' is used as a space character, so we replace it with space and display correctly the escaped one
-                .replace("¤", " ").replace("\\¤", "¤")
+                        .replace("{connection_state}", connection_state)
+                        .replace("{ban_servers}", ban_servers)
+                        .replace("{banip_servers}", banip_servers)
+                        .replace("{mute_servers}", mute_servers)
+                        .replace("{muteip_servers}", muteip_servers)
+                        .replace("{first_login}", first_login)
+                        .replace("{last_login}", last_login)
+                        .replace("{last_ip}", last_ip)
+                        .replace("{ip_users}", ip_users)
+                        .replace("{bans_number}", String.valueOf(bansNumber))
+                        .replace("{mutes_number}", String.valueOf(mutesNumber))
+                        .replace("{kicks_number}", String.valueOf(kicksNumber))
+                        .replace("{comments_number}", String.valueOf(commentsNumber))
+                        .replace("{name_history_list}", name_history_list)
+                        .replaceAll("\\{last_comments:\\d\\}", last_comments)
+                        .replace("{player}", pName)
+                        .replace("{uuid}", Core.getUUID(pName))
+                        // '¤' is used as a space character, so we replace it with space and display correctly the escaped one
+                        .replace("¤", " ")
+                        .replace("\\¤", "¤")
                 ));
         
         return finalMessage;

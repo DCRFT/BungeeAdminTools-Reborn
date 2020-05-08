@@ -21,11 +21,11 @@ public class EnhancedDateFormat{
 	public EnhancedDateFormat(final boolean litteralDate){
 		this.litteralDate = litteralDate;
 		final String at = I18n._("at");
-		defaultDF = new SimpleDateFormat("dd-MM-yyyy '" + at + "' HH:mm");
+		defaultDF = new SimpleDateFormat("dd-MM-yyyy '" + at + "' HH:mm z");
 		if(litteralDate){
-			tdaDF = new SimpleDateFormat("'" + I18n._("today").replace("'", "''") + " " + at + "' HH:mm");
-			tmwDF = new SimpleDateFormat("'" + I18n._("tomorrow").replace("'", "''") + " " + at + "' HH:mm");
-			ydaDF = new SimpleDateFormat("'" + I18n._("yesterday").replace("'", "''") + " " + at + "' HH:mm");
+			tdaDF = new SimpleDateFormat("'" + I18n._("today").replace("'", "''") + " " + at + "' HH:mm z");
+			tmwDF = new SimpleDateFormat("'" + I18n._("tomorrow").replace("'", "''") + " " + at + "' HH:mm z");
+			ydaDF = new SimpleDateFormat("'" + I18n._("yesterday").replace("'", "''") + " " + at + "' HH:mm z");
 		}
 	}
 	
