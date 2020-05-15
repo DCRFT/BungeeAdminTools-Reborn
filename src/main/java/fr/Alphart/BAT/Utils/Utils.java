@@ -25,7 +25,7 @@ public class Utils {
 	private final static Pattern timePattern = Pattern.compile("(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?"
 			+ "(?:([0-9]+)\\s*mo[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?"
 			+ "(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?"
-			+ "(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE);
+			+ "(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE); //#y#mo#w#d#h#m#s
 
 	/**
 	 * Get the timestamp corresponding to the current date + this duration
@@ -93,10 +93,10 @@ public class Utils {
 			c.add(Calendar.WEEK_OF_YEAR, weeks);
 		}
 		if (days > 0) {
-			c.add(Calendar.DAY_OF_MONTH, days);
+			c.add(Calendar.DAY_OF_YEAR, days);
 		}
 		if (hours > 0) {
-			c.add(Calendar.HOUR_OF_DAY, hours);
+			c.add(Calendar.HOUR, hours);
 		}
 		if (minutes > 0) {
 			c.add(Calendar.MINUTE, minutes);

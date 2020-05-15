@@ -326,6 +326,13 @@ public class CoreCommand extends BATCommand{
 										: "&eThe IP &a" + entity + "&e has no comment."));
 						}
 						break;
+					case "ip":
+
+						EntityEntry pDetails = new EntityEntry(entity);
+						String last_ip = pDetails.getLastIP();
+						message = lookupFormatter.getSummaryLookupIP(last_ip);
+
+						break;
 					default:
 						throw new InvalidModuleException("Module not found or invalid");
 					}
