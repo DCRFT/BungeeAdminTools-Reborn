@@ -57,7 +57,6 @@ public class CommentCommand extends CommandHandler{
 				return;
 			}
 			
-			checkArgument(comment.hasLastcommentCooledDown(args[0]), _("cooldownUnfinished"));
 			comment.insertComment(args[0], Utils.getFinalArg(args, 1), Type.NOTE, sender.getName());
 			sender.sendMessage(__("commentAdded"));
 		}
@@ -94,7 +93,6 @@ public class CommentCommand extends CommandHandler{
 				checkArgument(PermissionManager.canExecuteAction(Action.WARN , sender, ((ProxiedPlayer)sender).getServer().getInfo().getName()),
 						_("noPerm"));
 			}
-	          checkArgument(comment.hasLastcommentCooledDown(args[0]), _("cooldownUnfinished"));
 			comment.insertComment(args[0], reason, Type.WARNING, sender.getName());
 			if(target != null){
 			  target.sendMessage(__("wasWarnedNotif", new String[] {reason}));
