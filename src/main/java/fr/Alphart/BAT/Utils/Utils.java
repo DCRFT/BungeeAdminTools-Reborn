@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Map;
@@ -82,29 +85,29 @@ public class Utils {
 		if (!found) {
 			throw new IllegalArgumentException(ChatColor.RED + "Invalid duration !");
 		}
-		final Calendar c = new GregorianCalendar();
+		ZonedDateTime time = ZonedDateTime.now();
 		if (years > 0) {
-			c.add(Calendar.YEAR, years);
+			time = time.plusYears(years);
 		}
 		if (months > 0) {
-			c.add(Calendar.MONTH, months);
+			time = time.plusMonths(months);
 		}
 		if (weeks > 0) {
-			c.add(Calendar.WEEK_OF_YEAR, weeks);
+			time = time.plusWeeks(weeks);
 		}
 		if (days > 0) {
-			c.add(Calendar.DAY_OF_YEAR, days);
+			time = time.plusDays(days);
 		}
 		if (hours > 0) {
-			c.add(Calendar.HOUR, hours);
+			time = time.plusHours(hours);
 		}
 		if (minutes > 0) {
-			c.add(Calendar.MINUTE, minutes);
+			time = time.plusMinutes(minutes);
 		}
 		if (seconds > 0) {
-			c.add(Calendar.SECOND, seconds);
+			time = time.plusSeconds(seconds);
 		}
-		return c.getTimeInMillis();
+		return time.toInstant().toEpochMilli();
 	}
 
 	/**

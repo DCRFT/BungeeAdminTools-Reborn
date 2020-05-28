@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.cubespace.Yamler.Config.Config;
+import net.cubespace.Yamler.Config.YamlConfig;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.PluginManager;
@@ -15,7 +16,7 @@ import fr.Alphart.BAT.BAT;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class Trigger extends Config{
+public class Trigger extends YamlConfig {
 	@Getter
 	private int triggerNumber = 3;
 	@Getter
