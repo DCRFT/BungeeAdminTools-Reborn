@@ -180,8 +180,12 @@ public class Core implements IModule, Listener {
 		try {
 			return uuidCache.get(pName);
 		} catch (final Exception e) {
-			if(e.getCause() instanceof UUIDNotFoundException){
-				throw (UUIDNotFoundException)e.getCause();
+			try {
+				return getUUIDfromString(pName).toString().replaceAll("-","");
+			} catch (IllegalArgumentException exception) {
+				if(e.getCause() instanceof UUIDNotFoundException){
+					throw (UUIDNotFoundException)e.getCause();
+				}
 			}
 		}
 		return null;

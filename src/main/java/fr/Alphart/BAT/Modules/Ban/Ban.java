@@ -302,9 +302,8 @@ public class Ban implements IModule, Listener {
 
 			// Otherwise it's a player
 			else {
-				final String pName = bannedEntity;
-				final String sUUID = Core.getUUID(pName);
-				final ProxiedPlayer player = ProxyServer.getInstance().getPlayer(pName);
+				final String sUUID = Core.getUUID(bannedEntity);
+				final ProxiedPlayer player = Utils.getPlayer(bannedEntity);
 				final PreparedStatement statement = conn.prepareStatement(SQLQueries.Ban.createBan);
 				statement.setString(1, sUUID);
 				statement.setString(2, staff);
@@ -320,7 +319,7 @@ public class Ban implements IModule, Listener {
 						&& (server.equals(GLOBAL_SERVER) || player.getServer().getInfo().getName().equalsIgnoreCase(server))) {
 					BAT.kick(player, _("wasBannedNotif", new String[] { reason }));
 				} else if (BAT.getInstance().getRedis().isRedisEnabled()) {
-				    	UUID pUUID = RedisBungee.getApi().getUuidFromName(pName);
+				    	UUID pUUID = RedisBungee.getApi().getUuidFromName(bannedEntity);
 				    	if (RedisBungee.getApi().isPlayerOnline(pUUID)
 				    		&& ((server.equals(GLOBAL_SERVER) || RedisBungee.getApi().getServerFor(pUUID).getName().equalsIgnoreCase(server)))) {
 				    	    	BAT.getInstance().getRedis().sendGKickPlayer(pUUID, _("wasBannedNotif", new String[] { reason }));
@@ -328,10 +327,10 @@ public class Ban implements IModule, Listener {
 				}
 
 				if (expirationTimestamp > 0) {
-					return _("banTempBroadcast", new String[] { pName, FormatUtils.getDuration(expirationTimestamp),
+					return _("banTempBroadcast", new String[] {bannedEntity, FormatUtils.getDuration(expirationTimestamp),
 							staff, server, reason });
 				} else {
-					return _("banBroadcast", new String[] { pName, staff, server, reason });
+					return _("banBroadcast", new String[] {bannedEntity, staff, server, reason });
 				}
 			}
 		} catch (final SQLException e) {
