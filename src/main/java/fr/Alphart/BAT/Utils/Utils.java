@@ -17,6 +17,7 @@ import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -191,5 +192,25 @@ public class Utils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Finds a player based on an input string
+	 * @param str - either a player name, or UUID (in standard string format, with - separation)
+	 * @return a ProxiedPlayer with the above name or UUID. or Null if one couldn't be found.
+	 */
+	public static ProxiedPlayer getPlayer(String str) {
+		ProxiedPlayer out = ProxyServer.getInstance().getPlayer(str);
+		if (out==null) {
+			//Input string is not a known player name, try it as a UUID.
+			try {
+				UUID uuid = UUID.fromString(str);
+				out = ProxyServer.getInstance().getPlayer(uuid);
+			} catch (IllegalArgumentException ex) {
+				//Not a valid UUID - can't find player
+				out = null;
+			}
+		}
+		return out;
 	}
 }

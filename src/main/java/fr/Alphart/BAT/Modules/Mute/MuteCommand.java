@@ -243,7 +243,7 @@ public class MuteCommand extends CommandHandler {
 		String reason = IModule.NO_REASON;
 		final long expirationTimestamp = Utils.parseDuration(args[1]);
 
-		final ProxiedPlayer player = ProxyServer.getInstance().getPlayer(target);
+		final ProxiedPlayer player = Utils.getPlayer(target);
 
 		String ip = null;
 

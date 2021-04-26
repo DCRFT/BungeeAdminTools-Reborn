@@ -146,5 +146,5 @@
 		</plugins>
 	</build>
 	<description>Bungee plugin which handles ban, mute and kick management</description>
-	<version>1.6.3</version>
+	<version>1.6.4</version>
 </project>

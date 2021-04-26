@@ -59,6 +59,9 @@ public class BAT extends Plugin {
 		instance = this;
 		config = new Configuration();
 		getLogger().setLevel(Level.INFO);
+
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
 		if (!ProxyServer.getInstance().getName().equals("BungeeCord")) {
 		  getLogger().warning("BungeeCord version check disabled because a fork has been detected."
               + " Make sur your fork is based on a BungeeCord build > #" + requiredBCBuild);

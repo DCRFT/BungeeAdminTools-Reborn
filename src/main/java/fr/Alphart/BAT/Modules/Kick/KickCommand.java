@@ -55,7 +55,7 @@ public class KickCommand extends CommandHandler {
                 _("noReasonInCommand"));
                         
 			final String pName = args[0];
-	    	final ProxiedPlayer player = ProxyServer.getInstance().getPlayer(pName);
+	    	final ProxiedPlayer player = Utils.getPlayer(pName);
 	    	// The player is online on the proxy
 	    	if(player != null){
 	    		final String pServer = player.getServer().getInfo().getName();

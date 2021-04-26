@@ -110,7 +110,7 @@ public class BanCommand extends CommandHandler {
 		final String staff = sender.getName();
 		String reason = IModule.NO_REASON;
 
-		final ProxiedPlayer player = ProxyServer.getInstance().getPlayer(target);
+		final ProxiedPlayer player = Utils.getPlayer(target);
 		
 		UUID pUUID = null;
 		if (BAT.getInstance().getRedis().isRedisEnabled()) {
