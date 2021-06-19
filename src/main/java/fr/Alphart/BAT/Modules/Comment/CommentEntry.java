@@ -1,12 +1,12 @@
 package fr.Alphart.BAT.Modules.Comment;
 
+import fr.Alphart.BAT.Modules.Core.Core;
+
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import fr.Alphart.BAT.Modules.Core.Core;
-
 public class CommentEntry {
-	private Calendar localTime = Calendar.getInstance(TimeZone.getDefault());
+	private final Calendar localTime = Calendar.getInstance(TimeZone.getDefault());
 	private final int id;
 	private final String entity;
 	private final String content;
@@ -52,6 +52,6 @@ public class CommentEntry {
 	
 	public enum Type{
 		NOTE,
-		WARNING;
-	}
+		WARNING
+    }
 }

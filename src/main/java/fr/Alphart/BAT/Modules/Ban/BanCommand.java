@@ -1,28 +1,27 @@
 package fr.Alphart.BAT.Modules.Ban;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static fr.Alphart.BAT.I18n.I18n._;
-
-import java.util.UUID;
-
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-
 import com.google.common.base.Joiner;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
-
 import fr.Alphart.BAT.BAT;
+import fr.Alphart.BAT.Configuration;
+import fr.Alphart.BAT.I18n.I18n;
 import fr.Alphart.BAT.Modules.BATCommand;
 import fr.Alphart.BAT.Modules.BATCommand.RunAsync;
 import fr.Alphart.BAT.Modules.CommandHandler;
-import fr.Alphart.BAT.Modules.IModule;
-import fr.Alphart.BAT.Modules.InvalidModuleException;
 import fr.Alphart.BAT.Modules.Core.Core;
 import fr.Alphart.BAT.Modules.Core.PermissionManager;
 import fr.Alphart.BAT.Modules.Core.PermissionManager.Action;
+import fr.Alphart.BAT.Modules.IModule;
+import fr.Alphart.BAT.Modules.InvalidModuleException;
 import fr.Alphart.BAT.Utils.FormatUtils;
 import fr.Alphart.BAT.Utils.Utils;
+import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+
+import java.util.UUID;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static fr.Alphart.BAT.I18n.I18n.format;
 
 public class BanCommand extends CommandHandler {
 	private static Ban ban;
@@ -129,10 +128,10 @@ public class BanCommand extends CommandHandler {
 			}
 		} else {
 			if (args.length == 1) {
-				checkArgument(sender instanceof ProxiedPlayer, _("specifyServer"));
+				checkArgument(sender instanceof ProxiedPlayer, I18n.format("specifyServer"));
 				server = ((ProxiedPlayer) sender).getServer().getInfo().getName();
 			} else {
-				checkArgument(Utils.isServer(args[1]), _("invalidServer"));
+				checkArgument(Utils.isServer(args[1]), I18n.format("invalidServer"));
 				server = args[1];
 				reason = (args.length > 2) ? Utils.getFinalArg(args, 2) : IModule.NO_REASON;
 			}
@@ -140,21 +139,21 @@ public class BanCommand extends CommandHandler {
                 
                 
         checkArgument(
-                !reason.equalsIgnoreCase(IModule.NO_REASON) || !BAT.getInstance().getConfiguration().isMustGiveReason(),
-                _("noReasonInCommand"));
+                !reason.equalsIgnoreCase(IModule.NO_REASON) || !BAT.getInstance().getConfiguration().get(Configuration.mustGiveReason),
+                I18n.format("noReasonInCommand"));
                 
 
 		// Check if the target isn't an ip and the player is offline
 		if (!Utils.validIP(target) && player == null && pUUID == null) {
 			ip = Core.getPlayerIP(target);
 			if (ipBan) {
-				checkArgument(!"0.0.0.0".equals(ip), _("ipUnknownPlayer"));
+				checkArgument(!"0.0.0.0".equals(ip), I18n.format("ipUnknownPlayer"));
 			}
 			// If ip = 0.0.0.0, it means the player never connects
 			else {
 				if ("0.0.0.0".equals(ip) && !confirmedCmd) {
 					command.mustConfirmCommand(sender, command.getName() + " " + Joiner.on(' ').join(args),
-							_("operationUnknownPlayer", new String[] { target }));
+							format("operationUnknownPlayer", new String[] { target }));
 					return;
 				}
 				// Set the ip to null to avoid checking if the ip is banned
@@ -164,15 +163,15 @@ public class BanCommand extends CommandHandler {
 
 		if (!global) {
 			checkArgument(PermissionManager.canExecuteAction((ipBan) ? Action.BANIP : Action.BAN, sender, server),
-					_("noPerm"));
+					I18n.format("noPerm"));
 		}
 		target = (ip == null) ? target : ip;
 
 		// We just check if the target is exempt from the ban, which means he's
 		// exempt from the full module command
-		checkArgument(!PermissionManager.isExemptFrom(Action.BAN, target), _("isExempt"));
+		checkArgument(!PermissionManager.isExemptFrom(Action.BAN, target), I18n.format("isExempt"));
 
-		checkArgument(!ban.isBan((ip == null) ? target : ip, server), _("alreadyBan"));
+		checkArgument(!ban.isBan((ip == null) ? target : ip, server), I18n.format("alreadyBan"));
 
 		if (ipBan && player != null) {
 			returnedMsg = ban.banIP(player, server, staff, 0, reason);
@@ -271,10 +270,10 @@ public class BanCommand extends CommandHandler {
 			}
 		} else {
 			if (args.length == 2) {
-				checkArgument(sender instanceof ProxiedPlayer, _("specifyServer"));
+				checkArgument(sender instanceof ProxiedPlayer, I18n.format("specifyServer"));
 				server = ((ProxiedPlayer) sender).getServer().getInfo().getName();
 			} else {
-				checkArgument(Utils.isServer(args[2]), _("invalidServer"));
+				checkArgument(Utils.isServer(args[2]), I18n.format("invalidServer"));
 				server = args[2];
 				reason = (args.length > 3) ? Utils.getFinalArg(args, 3) : IModule.NO_REASON;
 			}
@@ -282,19 +281,19 @@ public class BanCommand extends CommandHandler {
 
                 
         checkArgument(
-                !reason.equalsIgnoreCase(IModule.NO_REASON) || !BAT.getInstance().getConfiguration().isMustGiveReason(),
-                _("noReasonInCommand"));
+                !reason.equalsIgnoreCase(IModule.NO_REASON) || !BAT.getInstance().getConfiguration().get(Configuration.mustGiveReason),
+                I18n.format("noReasonInCommand"));
                 
 		// Check if the target isn't an ip and the player is offline
 		if (!Utils.validIP(target) && player == null && pUUID == null) {
 			ip = Core.getPlayerIP(target);
 			if (ipBan) {
-				checkArgument(!"0.0.0.0".equals(ip), _("ipUnknownPlayer"));
+				checkArgument(!"0.0.0.0".equals(ip), I18n.format("ipUnknownPlayer"));
 			} else {
 				// If ip = 0.0.0.0, it means the player never connects
 				if ("0.0.0.0".equals(ip) && !confirmedCmd) {
 					command.mustConfirmCommand(sender, command.getName() + " " + Joiner.on(' ').join(args),
-							_("operationUnknownPlayer", new String[] { target }));
+							format("operationUnknownPlayer", new String[] { target }));
 					return;
 				}
 				// Set the ip to null to avoid checking if the ip is banned
@@ -305,12 +304,12 @@ public class BanCommand extends CommandHandler {
 		if (!global) {
 			checkArgument(
 					PermissionManager.canExecuteAction((ipBan) ? Action.TEMPBANIP : Action.TEMPBAN, sender, server),
-					_("noPerm"));
+					I18n.format("noPerm"));
 		}
 		target = (ip == null) ? target : ip;
 		
-		checkArgument(!PermissionManager.isExemptFrom(Action.BAN, target), _("isExempt"));
-		checkArgument(!ban.isBan(target, server), _("alreadyBan"));
+		checkArgument(!PermissionManager.isExemptFrom(Action.BAN, target), I18n.format("isExempt"));
+		checkArgument(!ban.isBan(target, server), I18n.format("alreadyBan"));
 
 		if (ipBan && player != null) {
 			returnedMsg = ban.banIP(player, server, staff, expirationTimestamp, reason);
@@ -399,10 +398,10 @@ public class BanCommand extends CommandHandler {
 			}
 		} else {
 			if (args.length == 1) {
-				checkArgument(sender instanceof ProxiedPlayer, _("specifyServer"));
+				checkArgument(sender instanceof ProxiedPlayer, I18n.format("specifyServer"));
 				server = ((ProxiedPlayer) sender).getServer().getInfo().getName();
 			} else {
-				checkArgument(Utils.isServer(args[1]), _("invalidServer"));
+				checkArgument(Utils.isServer(args[1]), I18n.format("invalidServer"));
 				server = args[1];
 				reason = (args.length > 2) ? Utils.getFinalArg(args, 2) : IModule.NO_REASON;
 			}
@@ -410,20 +409,20 @@ public class BanCommand extends CommandHandler {
                 
                 
         checkArgument(
-                !reason.equalsIgnoreCase(IModule.NO_REASON) || !BAT.getInstance().getConfiguration().isMustGiveReason(),
-                _("noReasonInCommand"));
+                !reason.equalsIgnoreCase(IModule.NO_REASON) || !BAT.getInstance().getConfiguration().get(Configuration.mustGiveReason),
+                I18n.format("noReasonInCommand"));
                 
 
 		// Check if the target isn't an ip and the player is offline
 		if (!Utils.validIP(target) && ipUnban) {
 			ip = Core.getPlayerIP(target);
-			checkArgument(!"0.0.0.0".equals(ip), _("ipUnknownPlayer"));
+			checkArgument(!"0.0.0.0".equals(ip), I18n.format("ipUnknownPlayer"));
 		}
 
 		if (!global) {
 			checkArgument(
 					PermissionManager.canExecuteAction((ipUnban) ? Action.UNBANIP : Action.UNBAN, sender, server),
-					_("noPerm"));
+					I18n.format("noPerm"));
 		}
 		target = (ip == null) ? target : ip;
 
@@ -431,8 +430,8 @@ public class BanCommand extends CommandHandler {
 
 		checkArgument(
 				ban.isBan((ip == null) ? target : ip, server),
-				(IModule.ANY_SERVER.equals(server) ? _("notBannedAny", formatArgs) : ((ipUnban) ? _("notBannedIP",
-						formatArgs) : _("notBanned", formatArgs))));
+				(IModule.ANY_SERVER.equals(server) ? format("notBannedAny", formatArgs) : ((ipUnban) ? format("notBannedIP",
+						formatArgs) : format("notBanned", formatArgs))));
 
 		if (ipUnban) {
 			returnedMsg = ban.unBanIP(target, server, staff, reason);

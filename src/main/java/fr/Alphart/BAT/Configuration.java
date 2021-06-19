@@ -1,68 +1,66 @@
 package fr.Alphart.BAT;
 
-import com.google.common.collect.Maps;
-import lombok.Getter;
-import lombok.Setter;
-import net.cubespace.Yamler.Config.Comment;
-import net.cubespace.Yamler.Config.InvalidConfigurationException;
-import net.cubespace.Yamler.Config.Path;
-import net.cubespace.Yamler.Config.YamlConfig;
+import me.mattstudios.config.SettingsHolder;
+import me.mattstudios.config.annotations.Comment;
+import me.mattstudios.config.annotations.Path;
+import me.mattstudios.config.properties.Property;
 
-import java.io.File;
-import java.util.Locale;
 import java.util.Map;
 
-@Getter
-public class Configuration extends YamlConfig {
-	public Configuration(){
-		CONFIG_HEADER = new String[]{"Bungee Admin Tools - Configuration file"};
-		CONFIG_FILE = new File(BAT.getInstance().getDataFolder(), "config.yml");
-		try {
-			init();
-			save();
-		} catch (final InvalidConfigurationException e) {
-			e.printStackTrace();
-		}
-	}
+public class Configuration implements SettingsHolder {
 
-	private String language = "en";
-	private String prefix = "&6[&4BAT&6]&e ";
+	private Configuration() {}
+
+	public static final Property<String> language = Property.create("en");
+	public static final Property<String> prefix = Property.create("&6[&4BAT&6]&e ");
 	
     @Comment("Force players to give reason when /ban /unban /kick /mute /unmute etc.")
-	private boolean mustGiveReason= false;
+	public static final Property<Boolean> mustGiveReason = Property.create(false);
+
 	@Comment("Enable /bat confirm, to confirm command such as action on unknown player.")
-	private boolean confirmCommand = true;
+	public static final Property<Boolean> confirmCommand = Property.create(true);
+
 	@Comment("Enable or disable simple aliases to bypass the /bat prefix for core commands")
-	private Map<String, Boolean> simpleAliasesCommands = Maps.newHashMap();
+	public static final Property<Map<String, Boolean>> simpleAliasesCommands = Property.create(Boolean.class, Map.of("default", false));
+
 	@Comment("Make the date more readable."
 			+ "If the date correspond to today, tmw or yda, it will replace the date by the corresponding word")
-	private boolean litteralDate = true;
+	public static final Property<Boolean> litteralDate = Property.create(true);
+
 	@Comment("Enable BETA (experimental) Redis support, requires RedisBungee")
-	private boolean redisSupport = false;
+	public static final Property<Boolean> redisSupport = Property.create(false);
+
 	@Comment("The debug mode enables verbose logging. All the logged message will be in the debug.log file in BAT folder")
-	private boolean debugMode = false;
+	public static Property<Boolean> debugMode = Property.create(false);
 	
-	
+
+
 	@Comment("Set to true to use MySQL. Otherwise SQL Lite will be used")
-	@Setter
-    @Path(value = "mysql.enabled")
-	private boolean mysql_enabled = true;
+	@Path(value = "mysql.enabled")
+	public static final Property<Boolean> mysql_enabled = Property.create(true);
+
     @Path(value = "mysql.user")
-	private String mysql_user = "user";
+	public static final Property<String> mysql_user = Property.create("user");
+
     @Path(value = "mysql.password")
-	private String mysql_password = "password";
+	public static final Property<String> mysql_password = Property.create("password");
+
     @Path(value = "mysql.database")
-	private String mysql_database = "database";
+	public static final Property<String> mysql_database = Property.create("database");
+
     @Path(value = "mysql.host")
-	private String mysql_host = "localhost";
+	public static final Property<String> mysql_host = Property.create("localhost");
+
 	@Comment("If you don't know it, just leave it like this (3306 = default mysql port)")
     @Path(value = "mysql.port")
-	private String mysql_port = "3306";
-	public Locale getLocale() {
-		if (language.length() != 2) {
-			BAT.getInstance().getLogger().severe("Incorrect language set ... The language was set to english.");
-			return new Locale("en");
-		}
-		return new Locale(language);
-	}
+	public static final Property<String> mysql_port = Property.create("3306");
+
+
+//	public Locale getLocale() {
+//		if (language.length() != 2) {
+//			BAT.getInstance().getLogger().severe("Incorrect language set ... The language was set to english.");
+//			return new Locale("en");
+//		}
+//		return new Locale(language);
+//	}
 }

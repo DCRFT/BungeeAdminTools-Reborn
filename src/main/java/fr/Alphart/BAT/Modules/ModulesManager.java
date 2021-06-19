@@ -1,25 +1,20 @@
 package fr.Alphart.BAT.Modules;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import net.cubespace.Yamler.Config.InvalidConfigurationException;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.plugin.Listener;
 import fr.Alphart.BAT.BAT;
 import fr.Alphart.BAT.Modules.Ban.Ban;
 import fr.Alphart.BAT.Modules.Comment.Comment;
 import fr.Alphart.BAT.Modules.Core.Core;
 import fr.Alphart.BAT.Modules.Kick.Kick;
 import fr.Alphart.BAT.Modules.Mute.Mute;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.plugin.Listener;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 public class ModulesManager {
 	private final Logger log;
@@ -32,15 +27,15 @@ public class ModulesManager {
 	public ModulesManager() {
 		log = BAT.getInstance().getLogger();
 		sb = new StringBuilder();
-		modules = new LinkedHashMap<IModule, Integer>();
-		modulesNames = new HashMap<String, IModule>();
+		modules = new LinkedHashMap<>();
+		modulesNames = new HashMap<>();
 	}
 
 	public void showHelp(final CommandSender sender) {
 		if (helpMessage == null) {
 			sb.append("&2---- &1Bungee&fAdmin&cTools&2 - HELP ----\n");
 			for (final Entry<IModule, Integer> entry : modules.entrySet()) {
-				if (entry.getValue() == IModule.ON_STATE) {
+				if (entry.getValue().equals(IModule.ON_STATE)) {
 					sb.append("- &B/");
 					sb.append(entry.getKey().getName());
 					sb.append(" help&2 : Show the help relative to the ");
@@ -69,12 +64,12 @@ public class ModulesManager {
 		modules.put(new Mute(), IModule.OFF_STATE);
 		modules.put(new Kick(), IModule.OFF_STATE);
 		modules.put(new Comment(), IModule.OFF_STATE);
-		cmdsModules = new HashMap<String, IModule>();
+		cmdsModules = new HashMap<>();
 		for (final IModule module : modules.keySet()) {
 			// The core doesn't have settings to enable or disable it
 			if (!module.getName().equals("core")) {
-				final Boolean isEnabled = module.getConfig().isEnabled();
-				if (isEnabled == null || !isEnabled) {
+				final Boolean isEnabled = module.getConfig().get(ModuleConfiguration.enabled);
+				if (!isEnabled) {
 					continue;
 				}
 			}
@@ -91,11 +86,7 @@ public class ModulesManager {
 					ProxyServer.getInstance().getPluginManager().registerCommand(BAT.getInstance(), cmd);
 				}
 				if(module.getConfig() != null){
-					try {
-						module.getConfig().save();
-					} catch (final InvalidConfigurationException e) {
-						e.printStackTrace();
-					}
+					module.getConfig().save();
 				}
 			} else {
 				log.severe("The " + module.getName() + " module encountered an error during his loading.");
@@ -116,9 +107,9 @@ public class ModulesManager {
 	}
 
 	public Set<IModule> getLoadedModules() {
-		final Set<IModule> modulesList = new HashSet<IModule>();
+		final Set<IModule> modulesList = new HashSet<>();
 		for (final Entry<IModule, Integer> entry : modules.entrySet()) {
-			if (entry.getValue() == IModule.ON_STATE) {
+			if (entry.getValue().equals(IModule.ON_STATE)) {
 				modulesList.add(entry.getKey());
 			}
 		}
@@ -130,8 +121,7 @@ public class ModulesManager {
 			if (getModule(name) != null) {
 				return true;
 			}
-		} catch (final InvalidModuleException e) {
-		}
+		} catch (final InvalidModuleException ignored) { }
 		return false;
 	}
 
@@ -143,7 +133,7 @@ public class ModulesManager {
 			}
 		} catch (final InvalidModuleException e) {
 			BAT.getInstance().getLogger()
-			.severe("The core module encountered a problem. Please report this to the developper :");
+			.severe("The core module encountered a problem. Please report this to the developer:");
 			e.printStackTrace();
 		}
 		return null;
@@ -183,7 +173,7 @@ public class ModulesManager {
 	
 	public IModule getModule(final String name) throws InvalidModuleException {
 		final IModule module = modulesNames.get(name);
-		if (module != null && modules.get(module) == IModule.ON_STATE) {
+		if (module != null && modules.get(module).equals(IModule.ON_STATE)) {
 			return module;
 		}
 		throw new InvalidModuleException("Module not found or invalid");

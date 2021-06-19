@@ -1,11 +1,11 @@
 package fr.Alphart.BAT.Utils;
 
+import fr.Alphart.BAT.I18n.I18n;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
-import fr.Alphart.BAT.I18n.I18n;
 
 public class EnhancedDateFormat{
 	private final Calendar currDate = Calendar.getInstance();
@@ -20,12 +20,12 @@ public class EnhancedDateFormat{
 	 */
 	public EnhancedDateFormat(final boolean litteralDate){
 		this.litteralDate = litteralDate;
-		final String at = I18n._("at");
+		final String at = I18n.format("at");
 		defaultDF = new SimpleDateFormat("dd-MM-yyyy '" + at + "' HH:mm z");
 		if(litteralDate){
-			tdaDF = new SimpleDateFormat("'" + I18n._("today").replace("'", "''") + " " + at + "' HH:mm z");
-			tmwDF = new SimpleDateFormat("'" + I18n._("tomorrow").replace("'", "''") + " " + at + "' HH:mm z");
-			ydaDF = new SimpleDateFormat("'" + I18n._("yesterday").replace("'", "''") + " " + at + "' HH:mm z");
+			tdaDF = new SimpleDateFormat("'" + I18n.format("today").replace("'", "''") + " " + at + "' HH:mm z");
+			tmwDF = new SimpleDateFormat("'" + I18n.format("tomorrow").replace("'", "''") + " " + at + "' HH:mm z");
+			ydaDF = new SimpleDateFormat("'" + I18n.format("yesterday").replace("'", "''") + " " + at + "' HH:mm z");
 		}
 	}
 	
