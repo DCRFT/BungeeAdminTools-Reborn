@@ -14,7 +14,7 @@ java -version
 ./gradlew clean shadowJar
 
 # create target folder
-mkdir -f ../build-output
+mkdir ../build-output
 
 # move the output
 cp build/libs/*.jar ../build-output/
