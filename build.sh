@@ -9,6 +9,7 @@ cd bungeeadmintools-git
 
 chmod +x ./gradlew
 
+java --version
 # gradle build
 ./gradlew clean shadowJar
 
