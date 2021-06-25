@@ -2,6 +2,9 @@
 
 set -e
 
+export REPOSILITE-ALIAS="$1"
+export REPOSILITE-TOKEN="$2"
+
 echo "---- Build Started ----"
 echo ""
 
