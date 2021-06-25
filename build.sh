@@ -2,19 +2,19 @@
 
 set -e
 
+echo "---- Build Started ----"
 echo ""
-echo " ... Running build"
 
 cd bungeeadmintools-git
 
 chmod +x ./gradlew
 
+echo "---- Java Version ----"
 java -version
+echo ""
+
 # gradle build
-./gradlew clean shadowJar
+./gradlew clean shadowJar publish
 
-# create target folder
-mkdir ../build-output
-
-# move the output
-cp build/libs/*.jar ../build-output/
+echo ""
+echo "---- Build Finished ----"

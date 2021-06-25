@@ -5,6 +5,7 @@ import java.util.zip.ZipOutputStream
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.0.0"
+    `maven-publish`
 }
 
 repositories {
@@ -59,5 +60,28 @@ tasks {
 
     withType<JavaCompile> {
         options.encoding = "UTF-8"
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            val releasesRepoUrl = uri("https://repo.starmism.me/releases/")
+            val snapshotsRepoUrl = uri("https://repo.starmism.me/snapshots/")
+            url = if (version.toString().contains("DEV")) snapshotsRepoUrl else releasesRepoUrl
+
+            credentials {
+                username = System.getenv("REPOSILITE-ALIAS")
+                password = System.getenv("REPOSILITE-TOKEN")
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
     }
 }
