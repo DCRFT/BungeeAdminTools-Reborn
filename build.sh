@@ -14,7 +14,7 @@ java -version
 echo ""
 
 # gradle build
-./gradlew clean shadowJar publish
+./gradlew clean shadowJar
 
 echo ""
 echo "---- Build Finished ----"

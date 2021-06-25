@@ -2,7 +2,7 @@ name: BungeeAdminTools-Reborn
 api-version: 1.17
 authors: [Alphart, Starmism]
 version: ${version}
-main: fr.Alphart.bat.BAT
+main: me.starmism.batr.BATR
 softdepend: [RedisBungee]
 libraries:
   - org.xerial:sqlite-jdbc:3.34.0
