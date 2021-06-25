@@ -8,3 +8,4 @@ build_move-BAT.bat
 *.iml
 /build
 /.gradle
+src/main/resources/translations.zip

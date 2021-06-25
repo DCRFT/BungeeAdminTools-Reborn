@@ -1,5 +1,9 @@
-name: BungeeAdminTools
-author: Alphart
-version: ${project.version}
-main: fr.Alphart.BAT.BAT
-softdepends: [RedisBungee]
+name: BungeeAdminTools-Reborn
+api-version: 1.17
+authors: [Alphart, Starmism]
+version: ${version}
+main: fr.Alphart.bat.BAT
+softdepend: [RedisBungee]
+libraries:
+  - org.xerial:sqlite-jdbc:3.34.0
+  - com.zaxxer:HikariCP:2.4.0
