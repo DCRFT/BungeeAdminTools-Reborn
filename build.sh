@@ -7,6 +7,8 @@ echo " ... Running build"
 
 cd bungeeadmintools-git
 
+chmod +x ./gradlew
+
 # gradle build
 ./gradlew clean shadowJar
 
