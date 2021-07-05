@@ -1,9 +1,11 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 plugins {
     java
+    kotlin("jvm") version "1.5.20"
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
@@ -24,7 +26,7 @@ dependencies {
 }
 
 group = "me.starmism"
-version = "2.0.0-DEV"
+version = "2.0.1-DEV"
 description = "BungeeAdminTools Reborn"
 java.sourceCompatibility = JavaVersion.VERSION_16
 
@@ -55,9 +57,14 @@ tasks {
         //minimize()
         archiveFileName.set("${project.name}-${project.version}.jar")
         exclude("META-INF/**")
+        exclude("DebugProbesKt.bin")
     }
 
     withType<JavaCompile> {
         options.encoding = "UTF-8"
+    }
+
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "16"
     }
 }

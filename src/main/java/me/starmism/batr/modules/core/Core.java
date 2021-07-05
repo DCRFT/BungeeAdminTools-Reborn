@@ -13,9 +13,9 @@ import me.starmism.batr.database.SQLQueries;
 import me.starmism.batr.modules.BATCommand;
 import me.starmism.batr.modules.IModule;
 import me.starmism.batr.utils.EnhancedDateFormat;
-import me.starmism.batr.utils.MojangAPIProvider;
+import me.starmism.batr.utils.MojangAPIProviderKt;
 import me.starmism.batr.utils.UUIDNotFoundException;
-import me.starmism.batr.utils.Utils;
+import me.starmism.batr.utils.UtilsKt;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -69,7 +69,7 @@ public class Core implements IModule, Listener {
 
                             // If online server, retrieve the UUID from the mojang server
                             if (UUID.isEmpty() && ProxyServer.getInstance().getConfig().isOnlineMode()) {
-                                UUID = MojangAPIProvider.getUUID(pName);
+                                UUID = MojangAPIProviderKt.getUUID(pName);
                                 if (UUID == null) {
                                     throw new UUIDNotFoundException(pName);
                                 }
@@ -152,7 +152,7 @@ public class Core implements IModule, Listener {
             }
         } else {
             final ProxiedPlayer player = ProxyServer.getInstance().getPlayer(pName);
-            if (player != null) return Utils.getPlayerIP(player);
+            if (player != null) return UtilsKt.getPlayerIP(player);
         }
 
         PreparedStatement statement = null;
@@ -190,6 +190,11 @@ public class Core implements IModule, Listener {
     @Override
     public SettingsManager getConfig() {
         return null;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     @Override
@@ -250,7 +255,7 @@ public class Core implements IModule, Listener {
     public void updatePlayerIPandUUID(final ProxiedPlayer player) {
         PreparedStatement statement = null;
         try (Connection conn = BATR.getConnection()) {
-            final String ip = Utils.getPlayerIP(player);
+            final String ip = UtilsKt.getPlayerIP(player);
             final String UUID = player.getUniqueId().toString().replaceAll("-", "");
             statement = (DataSourceHandler.isSQLite()) ? conn.prepareStatement(SQLQueries.Core.SQLite.updateIPUUID)
                     : conn.prepareStatement(SQLQueries.Core.updateIPUUID);

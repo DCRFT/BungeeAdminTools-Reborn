@@ -12,13 +12,5 @@ public class CallbackUtils {
 	    
 	    void onMinorError(final String errorMessage);
 	}
-	
-	public static class VoidCallback implements Callback<Object>{
 
-		@Override
-		public final void done(final Object nullable, Throwable throwable) {
-			
-		}
-		
-	}
 }

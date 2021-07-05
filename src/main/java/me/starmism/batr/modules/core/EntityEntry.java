@@ -3,14 +3,13 @@ package me.starmism.batr.modules.core;
 import me.starmism.batr.BATR;
 import me.starmism.batr.database.DataSourceHandler;
 import me.starmism.batr.database.SQLQueries;
-import me.starmism.batr.modules.InvalidModuleException;
 import me.starmism.batr.modules.ModulesManager;
 import me.starmism.batr.modules.ban.BanEntry;
 import me.starmism.batr.modules.comment.CommentEntry;
 import me.starmism.batr.modules.kick.KickEntry;
 import me.starmism.batr.modules.mute.MuteEntry;
 import me.starmism.batr.utils.UUIDNotFoundException;
-import me.starmism.batr.utils.Utils;
+import me.starmism.batr.utils.UtilsKt;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -43,7 +42,7 @@ public class EntityEntry {
         this.entity = entity;
 
         // This is a player
-        if (!Utils.validIP(entity)) {
+        if (!UtilsKt.validIP(entity)) {
             // Get players basic information (first/last login, last ip)
             player = true;
             PreparedStatement statement = null;
@@ -66,7 +65,7 @@ public class EntityEntry {
                     }
                     final ProxiedPlayer player = ProxyServer.getInstance().getPlayer(entity);
                     if (player != null) {
-                        lastIP = Utils.getPlayerIP(player);
+                        lastIP = UtilsKt.getPlayerIP(player);
                     } else {
                         lastIP = resultSet.getString("lastip");
                     }
@@ -121,12 +120,9 @@ public class EntityEntry {
             if (modules.isLoaded("comment")) {
                 comments.addAll(modules.getCommentModule().getComments(entity));
             }
-        } catch (final InvalidModuleException | UUIDNotFoundException e) {
-            if (e instanceof UUIDNotFoundException) {
-                exist = false;
-            }
+        } catch (final UUIDNotFoundException e) {
+            exist = false;
         }
-
     }
 
     public String getEntity() {

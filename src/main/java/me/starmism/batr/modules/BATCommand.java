@@ -27,15 +27,13 @@ import java.util.MissingResourceException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static me.starmism.batr.i18n.I18n.format;
-import static me.starmism.batr.i18n.I18n.formatPrefix;
-
 public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command implements TabExecutor {
     private static final Pattern pattern = Pattern.compile("<.*?>");
     private final String name;
     private final String syntax;
     private final String description;
     private final String permission;
+    private final I18n i18n;
     private boolean runAsync = false;
     private boolean coreCommand = false;
 
@@ -47,7 +45,7 @@ public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command impl
      * @param name        name of this command
      * @param description description of this command
      * @param permission  permission required to use this commands
-     * @param aliases     aliases of this commnad (optionnal)
+     * @param aliases     aliases of this command (optional)
      */
     public BATCommand(final String name, final String syntax, final String description, final String permission,
                       final String... aliases) {
@@ -56,6 +54,8 @@ public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command impl
         this.syntax = syntax;
         this.permission = permission;
         this.description = description;
+
+        i18n = BATR.getInstance().getI18n();
 
 
         // Compute min args
@@ -104,17 +104,17 @@ public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command impl
             if (exception.getMessage() == null) {
                 if (coreCommand) {
                     // Just need to add the /bat if it's a core command
-                    sender.sendMessage(I18n.formatPrefix("invalidArgsUsage", new String[]{"&e/bat " + getFormatUsage()}));
+                    sender.sendMessage(i18n.formatPrefix("invalidArgsUsage", new String[]{"&e/bat " + getFormatUsage()}));
                 } else {
-                    sender.sendMessage(I18n.formatPrefix("invalidArgsUsage", new String[]{"&e/" + getFormatUsage()}));
+                    sender.sendMessage(i18n.formatPrefix("invalidArgsUsage", new String[]{"&e/" + getFormatUsage()}));
                 }
-            } else if (I18n.format("noPerm").equals(exception.getMessage())) {
-                sender.sendMessage(formatPrefix("noPerm"));
+            } else if (i18n.format("noPerm").equals(exception.getMessage())) {
+                sender.sendMessage(i18n.formatPrefix("noPerm"));
             } else {
-                sender.sendMessage(I18n.formatPrefix("invalidArgs", new String[]{exception.getMessage()}));
+                sender.sendMessage(i18n.formatPrefix("invalidArgs", new String[]{exception.getMessage()}));
             }
         } else if (exception instanceof UUIDNotFoundException) {
-            sender.sendMessage(I18n.formatPrefix("invalidArgs", new String[]{format("cannotGetUUID", new String[]{((UUIDNotFoundException) exception).getInvolvedPlayer()})}));
+            sender.sendMessage(i18n.formatPrefix("invalidArgs", new String[]{i18n.format("cannotGetUUID", new String[]{((UUIDNotFoundException) exception).getInvolvedPlayer()})}));
         } else if (exception instanceof MissingResourceException) {
             sender.sendMessage(BATR.convertStringToComponent("&cAn error occurred with the translation. Key involved: &a" + ((MissingResourceException) exception).getKey()));
         } else {
@@ -133,7 +133,7 @@ public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command impl
             boolean hasPerm = false;
             Collection<String> senderPerm = Core.getCommandSenderPermission(sender);
             for (final String perm : senderPerm) {
-                // The grantall give acces to all command (used when command is executed, but the plugin check in the command if the sender can execute this action)
+                // The grantall give access to all command (used when command is executed, but the plugin check in the command if the sender can execute this action)
                 // except the /bat ... commands
                 if (perm.toLowerCase().startsWith(permission)) {
                     hasPerm = true;
@@ -159,7 +159,7 @@ public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command impl
                 }
             }
             if (!hasPerm) {
-                sender.sendMessage(formatPrefix("noPerm"));
+                sender.sendMessage(i18n.formatPrefix("noPerm"));
                 return;
             }
         }
@@ -222,25 +222,14 @@ public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command impl
     public abstract void onCommand(final CommandSender sender, final String[] args, final boolean confirmedCmd)
             throws IllegalArgumentException;
 
-    /**
-     * Check if the sender is a player <br>
-     * Use for readability
-     *
-     * @param sender
-     * @return true if the sender is a player otherwise false
-     */
-    public boolean isPlayer(final CommandSender sender) {
-        return sender instanceof ProxiedPlayer;
-    }
-
     public void mustConfirmCommand(final CommandSender sender, final String command, final String message) {
         final String cmdToConfirm = (BATR.getInstance().getConfiguration().get(Configuration.SIMPLE_ALIASES_COMMANDS).get("confirm"))
                 ? "confirm" : "bat confirm";
         if (!CommandQueue.isExecutingQueueCommand(sender)) {
             if ("".equals(message)) {
-                sender.sendMessage(I18n.formatPrefix("mustConfirm", new String[]{"", cmdToConfirm}));
+                sender.sendMessage(i18n.formatPrefix("mustConfirm", new String[]{"", cmdToConfirm}));
             } else {
-                sender.sendMessage(I18n.formatPrefix("mustConfirm", new String[]{"&e" + message, cmdToConfirm}));
+                sender.sendMessage(i18n.formatPrefix("mustConfirm", new String[]{"&e" + message, cmdToConfirm}));
             }
             CommandQueue.queueCommand(sender, command);
         }
@@ -250,7 +239,7 @@ public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command impl
         this.minArgs = minArgs;
     }
 
-    /* Utils for command */
+    /* UtilsKt for command */
 
     /**
      * Use this annotation onCommand if the command need to be ran async

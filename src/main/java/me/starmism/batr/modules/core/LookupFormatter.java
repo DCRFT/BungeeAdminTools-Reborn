@@ -12,9 +12,9 @@ import me.starmism.batr.modules.comment.CommentEntry;
 import me.starmism.batr.modules.comment.CommentEntry.Type;
 import me.starmism.batr.modules.kick.KickEntry;
 import me.starmism.batr.modules.mute.MuteEntry;
-import me.starmism.batr.utils.FormatUtils;
-import me.starmism.batr.utils.MojangAPIProvider;
-import me.starmism.batr.utils.Utils;
+import me.starmism.batr.utils.FormatUtilsKt;
+import me.starmism.batr.utils.MojangAPIProviderKt;
+import me.starmism.batr.utils.UtilsKt;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -25,18 +25,17 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static me.starmism.batr.i18n.I18n.format;
-import static me.starmism.batr.i18n.I18n.formatPrefix;
-
 public class LookupFormatter {
     private static final int entriesPerPage = 15;
     private final ModulesManager modules;
     private final String lookupHeader;
     private final String lookupFooter;
+    private final I18n i18n;
 
     public LookupFormatter() {
-        lookupHeader = I18n.format("perModuleLookupHeader");
-        lookupFooter = I18n.format("perModuleLookupFooter");
+        i18n = BATR.getInstance().getI18n();
+        lookupHeader = i18n.format("perModuleLookupHeader");
+        lookupFooter = i18n.format("perModuleLookupFooter");
         modules = BATR.getInstance().getModules();
     }
 
@@ -46,7 +45,7 @@ public class LookupFormatter {
 
         if (!pDetails.exist()) {
             final List<BaseComponent[]> returnedMsg = new ArrayList<>();
-            returnedMsg.add(formatPrefix("playerNotFound"));
+            returnedMsg.add(i18n.formatPrefix("playerNotFound"));
             return returnedMsg;
         }
 
@@ -92,7 +91,7 @@ public class LookupFormatter {
         kicksNumber = pDetails.getKicks().size();
 
         // Load the lookup pattern
-        final String lookupPattern = I18n.format("playerLookup");
+        final String lookupPattern = i18n.format("playerLookup");
 
         // Initialize all the strings to prepare the big replace
         String connection_state;
@@ -100,16 +99,16 @@ public class LookupFormatter {
             UUID pUUID = RedisBungee.getApi().getUuidFromName(pName, true);
             if (pUUID != null && RedisBungee.getApi().isPlayerOnline(pUUID)) {
                 ServerInfo si = RedisBungee.getApi().getServerFor(pUUID);
-                connection_state = I18n.format("connectionStateOnline").replace("{server}", si != null ? si.getName() : "unknown state");
+                connection_state = i18n.format("connectionStateOnline").replace("{server}", si != null ? si.getName() : "unknown state");
             } else {
-                connection_state = I18n.format("connectionStateOffline");
+                connection_state = i18n.format("connectionStateOffline");
             }
         } else {
             if (ProxyServer.getInstance().getPlayer(pName) != null) {
-                connection_state = I18n.format("connectionStateOnline")
+                connection_state = i18n.format("connectionStateOnline")
                         .replace("{server}", ProxyServer.getInstance().getPlayer(pName).getServer().getInfo().getName());
             } else {
-                connection_state = I18n.format("connectionStateOffline");
+                connection_state = i18n.format("connectionStateOffline");
             }
 
         }
@@ -117,36 +116,36 @@ public class LookupFormatter {
         final String joinChar = "&f, &3";
         final String ban_servers = !banServers.isEmpty()
                 ? Joiner.on(joinChar).join(banServers).toLowerCase()
-                : I18n.format("none");
+                : i18n.format("none");
         final String banip_servers = !banIPServers.isEmpty()
                 ? Joiner.on(joinChar).join(banIPServers).toLowerCase()
-                : I18n.format("none");
+                : i18n.format("none");
         final String mute_servers = !muteServers.isEmpty()
                 ? Joiner.on(joinChar).join(muteServers).toLowerCase()
-                : I18n.format("none");
+                : i18n.format("none");
         final String muteip_servers = !muteIPServers.isEmpty()
                 ? Joiner.on(joinChar).join(muteIPServers).toLowerCase()
-                : I18n.format("none");
+                : i18n.format("none");
 
         final String first_login = pDetails.getFirstLogin() != EntityEntry.noDateFound
                 ? Core.defaultDF.format(new Date(pDetails.getFirstLogin().getTime()))
-                : I18n.format("unknownDate");
+                : i18n.format("unknownDate");
         final String last_login = pDetails.getLastLogin() != EntityEntry.noDateFound
                 ? Core.defaultDF.format(new Date(pDetails.getLastLogin().getTime()))
-                : I18n.format("unknownDate");
+                : i18n.format("unknownDate");
         final String last_ip = !"0.0.0.0".equals(pDetails.getLastIP())
-                ? ((displayIP) ? pDetails.getLastIP() : I18n.format("hiddenIp"))
-                : I18n.format("unknownIp");
+                ? ((displayIP) ? pDetails.getLastIP() : i18n.format("hiddenIp"))
+                : i18n.format("unknownIp");
 
         final String ip_users = !ipDetails.getUsers().isEmpty()
                 ? Joiner.on(joinChar).join(ipDetails.getUsers())
-                : I18n.format("none");
+                : i18n.format("none");
 
         String name_history_list;
         // Create a function for that or something better than a big chunk of code inside the lookup
         if (ProxyServer.getInstance().getConfig().isOnlineMode()) {
             try {
-                name_history_list = Joiner.on("&e, &a").join(MojangAPIProvider.getPlayerNameHistory(pName));
+                name_history_list = Joiner.on("&e, &a").join(MojangAPIProviderKt.getPlayerNameHistory(pName));
             } catch (final RuntimeException e) {
                 name_history_list = "unable to fetch player's name history. Check the logs";
                 BATR.getInstance().getLogger().severe("An error occurred while fetching " + pName + "'s name history from Mojang servers."
@@ -172,7 +171,7 @@ public class LookupFormatter {
             }
             int i = 0;
             for (final CommentEntry comm : pDetails.getComments()) {
-                last_comments.append(format("commentRow", new String[]{String.valueOf(comm.getID()),
+                last_comments.append(i18n.format("commentRow", new String[]{String.valueOf(comm.getID()),
                         (comm.getType() == Type.NOTE) ? "&eComment" : "&cWarning", comm.getContent(),
                         comm.getFormattedDate(), comm.getAuthor()}));
                 i++;
@@ -181,13 +180,13 @@ public class LookupFormatter {
                 }
             }
             if (last_comments.length() == 0) {
-                last_comments = new StringBuilder(format("none\n"));
+                last_comments = new StringBuilder(i18n.format("none\n"));
             }
         } catch (final NumberFormatException e) {
             last_comments = new StringBuilder("Unable to parse the number of last_comments");
         }
 
-        return FormatUtils.formatNewLine(ChatColor.translateAlternateColorCodes('&',
+        return FormatUtilsKt.formatNewLine(ChatColor.translateAlternateColorCodes('&',
                 lookupPattern
                         .replace("{connection_state}", connection_state)
                         .replace("{ban_servers}", ban_servers)
@@ -216,7 +215,7 @@ public class LookupFormatter {
         final EntityEntry ipDetails = new EntityEntry(ip);
         if (!ipDetails.exist()) {
             final List<BaseComponent[]> returnedMsg = new ArrayList<>();
-            returnedMsg.add(formatPrefix("unknownIp"));
+            returnedMsg.add(i18n.formatPrefix("unknownIp"));
             return returnedMsg;
         }
         boolean isBan = false;
@@ -248,15 +247,15 @@ public class LookupFormatter {
         final String joinChar = "&f, &3";
         final String ip_users = !ipDetails.getUsers().isEmpty()
                 ? Joiner.on(joinChar).join(ipDetails.getUsers())
-                : I18n.format("none");
+                : i18n.format("none");
         final String ban_servers = !banServers.isEmpty()
                 ? Joiner.on(joinChar).join(banServers).toLowerCase()
-                : I18n.format("none");
+                : i18n.format("none");
         final String mute_servers = !muteServers.isEmpty()
                 ? Joiner.on(joinChar).join(muteServers).toLowerCase()
-                : I18n.format("none");
+                : i18n.format("none");
 
-        String replacedString = I18n.format("ipLookup")
+        String replacedString = i18n.format("ipLookup")
                 .replace("{ban_servers}", ban_servers).replace("{mute_servers}", mute_servers)
                 .replace("{bans_number}", String.valueOf(bansNumber)).replace("{mutes_number}", String.valueOf(mutesNumber))
                 .replace("{ip}", ip).replace("{ip_users}", ip_users)
@@ -266,7 +265,7 @@ public class LookupFormatter {
         if (replacedString.contains("{ip_location}")) {
             String ipLocation;
             try {
-                ipLocation = Utils.getIpDetails(ip);
+                ipLocation = UtilsKt.getIpDetails(ip);
             } catch (final Exception e) {
                 BATR.getInstance().getLogger().log(Level.SEVERE,
                         "Error while fetching ip location from the API. Please report this :", e);
@@ -275,7 +274,7 @@ public class LookupFormatter {
             replacedString = replacedString.replace("{ip_location}", ipLocation);
         }
 
-        return FormatUtils.formatNewLine(ChatColor.translateAlternateColorCodes('&',
+        return FormatUtilsKt.formatNewLine(ChatColor.translateAlternateColorCodes('&',
                 replacedString));
     }
 
@@ -287,49 +286,45 @@ public class LookupFormatter {
         int kicks_number = 0;
         int comments_number = 0;
         int warnings_number = 0;
-        try {
-            if (modules.isLoaded("ban")) {
-                for (final BanEntry ban : modules.getBanModule().getManagedBan(staff)) {
-                    if (staff.equalsIgnoreCase(ban.staff())) {
-                        bans_number++;
-                    }
-                    if (staff.equalsIgnoreCase(ban.unbanStaff())) {
-                        unbans_number++;
-                    }
+        if (modules.isLoaded("ban")) {
+            for (final BanEntry ban : modules.getBanModule().getManagedBan(staff)) {
+                if (staff.equalsIgnoreCase(ban.staff())) {
+                    bans_number++;
+                }
+                if (staff.equalsIgnoreCase(ban.unbanStaff())) {
+                    unbans_number++;
                 }
             }
-            if (modules.isLoaded("mute")) {
-                for (final MuteEntry mute : modules.getMuteModule().getManagedMute(staff)) {
-                    if (staff.equalsIgnoreCase(mute.staff())) {
-                        mutes_number++;
-                    }
-                    if (staff.equalsIgnoreCase(mute.unmuteStaff())) {
-                        unmutes_number++;
-                    }
+        }
+        if (modules.isLoaded("mute")) {
+            for (final MuteEntry mute : modules.getMuteModule().getManagedMute(staff)) {
+                if (staff.equalsIgnoreCase(mute.staff())) {
+                    mutes_number++;
+                }
+                if (staff.equalsIgnoreCase(mute.unmuteStaff())) {
+                    unmutes_number++;
                 }
             }
-            if (modules.isLoaded("kick")) {
-                for (final KickEntry kick : modules.getKickModule().getManagedKick(staff)) {
-                    if (staff.equalsIgnoreCase(kick.staff())) {
-                        kicks_number++;
-                    }
+        }
+        if (modules.isLoaded("kick")) {
+            for (final KickEntry kick : modules.getKickModule().getManagedKick(staff)) {
+                if (staff.equalsIgnoreCase(kick.staff())) {
+                    kicks_number++;
                 }
             }
-            if (modules.isLoaded("comment")) {
-                for (final CommentEntry mute : modules.getCommentModule().getManagedComments(staff)) {
-                    if (mute.getType() == Type.NOTE) {
-                        comments_number++;
-                    } else {
-                        warnings_number++;
-                    }
+        }
+        if (modules.isLoaded("comment")) {
+            for (final CommentEntry mute : modules.getCommentModule().getManagedComments(staff)) {
+                if (mute.getType() == Type.NOTE) {
+                    comments_number++;
+                } else {
+                    warnings_number++;
                 }
             }
-        } catch (final InvalidModuleException e) {
-            e.printStackTrace();
         }
 
-        return FormatUtils.formatNewLine(ChatColor.translateAlternateColorCodes('&',
-                I18n.format("staffLookup")
+        return FormatUtilsKt.formatNewLine(ChatColor.translateAlternateColorCodes('&',
+                i18n.format("staffLookup")
                         .replace("{bans_number}", String.valueOf(bans_number)).replace("{unbans_number}", String.valueOf(unbans_number))
                         .replace("{mutes_number}", String.valueOf(mutes_number)).replace("{unmutes_number}", String.valueOf(unmutes_number))
                         .replace("{kicks_number}", String.valueOf(kicks_number))
@@ -390,10 +385,10 @@ public class LookupFormatter {
 
                 msg.append("\n");
                 if (staffLookup) {
-                    msg.append(format("activeStaffBanLookupRow",
+                    msg.append(i18n.format("activeStaffBanLookupRow",
                             new String[]{ban.entity(), begin, server, reason, end}));
                 } else {
-                    msg.append(format("activeBanLookupRow",
+                    msg.append(i18n.format("activeBanLookupRow",
                             new String[]{begin, server, reason, ban.staff(), end}));
                 }
                 it.remove();
@@ -421,10 +416,10 @@ public class LookupFormatter {
 
                 msg.append("\n");
                 if (staffLookup) {
-                    msg.append(format("archiveStaffBanLookupRow",
+                    msg.append(i18n.format("archiveStaffBanLookupRow",
                             new String[]{ban.entity(), begin, server, reason, endDate, unbanReason, unbanStaff}));
                 } else {
-                    msg.append(format("archiveBanLookupRow",
+                    msg.append(i18n.format("archiveBanLookupRow",
                             new String[]{begin, server, reason, ban.staff(), endDate, unbanReason, unbanStaff}));
                 }
             }
@@ -433,7 +428,7 @@ public class LookupFormatter {
         msg.append(lookupFooter.replace("{entity}", entity).replace("{module}", "Ban")
                 .replace("{page}", page + "/" + totalPages));
 
-        return FormatUtils.formatNewLine(ChatColor.translateAlternateColorCodes('&', msg.toString()));
+        return FormatUtilsKt.formatNewLine(ChatColor.translateAlternateColorCodes('&', msg.toString()));
     }
 
     public List<BaseComponent[]> formatMuteLookup(final String entity, final List<MuteEntry> mutes,
@@ -486,10 +481,10 @@ public class LookupFormatter {
 
                 msg.append("\n");
                 if (staffLookup) {
-                    msg.append(format("activeStaffMuteLookupRow",
+                    msg.append(i18n.format("activeStaffMuteLookupRow",
                             new String[]{mute.entity(), begin, server, reason, end}));
                 } else {
-                    msg.append(format("activeMuteLookupRow",
+                    msg.append(i18n.format("activeMuteLookupRow",
                             new String[]{begin, server, reason, mute.staff(), end}));
                 }
                 it.remove();
@@ -511,16 +506,16 @@ public class LookupFormatter {
                 }
                 final String unmuteReason = mute.unmuteReason();
                 String unmuteStaff = mute.unmuteStaff();
-                if (unmuteStaff.equals("null")) {
+                if (unmuteStaff == null || unmuteStaff.equals("null")) {
                     unmuteStaff = "Temp Mute";
                 }
 
                 msg.append("\n");
                 if (staffLookup) {
-                    msg.append(format("archiveStaffMuteLookupRow",
+                    msg.append(i18n.format("archiveStaffMuteLookupRow",
                             new String[]{mute.entity(), begin, server, reason, unmuteDate, unmuteReason, unmuteStaff}));
                 } else {
-                    msg.append(format("archiveMuteLookupRow",
+                    msg.append(i18n.format("archiveMuteLookupRow",
                             new String[]{begin, server, reason, mute.staff(), unmuteDate, unmuteReason, unmuteStaff}));
                 }
             }
@@ -529,7 +524,7 @@ public class LookupFormatter {
         msg.append(lookupFooter.replace("{entity}", entity).replace("{module}", "Mute")
                 .replace("{page}", page + "/" + totalPages));
 
-        return FormatUtils.formatNewLine(ChatColor.translateAlternateColorCodes('&', msg.toString()));
+        return FormatUtilsKt.formatNewLine(ChatColor.translateAlternateColorCodes('&', msg.toString()));
     }
 
     public List<BaseComponent[]> formatKickLookup(final String entity, final List<KickEntry> kicks,
@@ -562,10 +557,10 @@ public class LookupFormatter {
 
             msg.append("\n");
             if (staffLookup) {
-                msg.append(format("kickStaffLookupRow",
+                msg.append(i18n.format("kickStaffLookupRow",
                         new String[]{kick.entity(), date, server, reason}));
             } else {
-                msg.append(format("kickLookupRow",
+                msg.append(i18n.format("kickLookupRow",
                         new String[]{date, server, reason, kick.staff()}));
             }
         }
@@ -573,7 +568,7 @@ public class LookupFormatter {
         msg.append(lookupFooter.replace("{entity}", entity).replace("{module}", "Kick")
                 .replace("{page}", page + "/" + totalPages));
 
-        return FormatUtils.formatNewLine(ChatColor.translateAlternateColorCodes('&', msg.toString()));
+        return FormatUtilsKt.formatNewLine(ChatColor.translateAlternateColorCodes('&', msg.toString()));
     }
 
     public List<BaseComponent[]> commentRowLookup(final String entity, final List<CommentEntry> comments,
@@ -603,11 +598,11 @@ public class LookupFormatter {
             for (final CommentEntry comm : comments) {
                 msg.append("\n");
                 if (staffLookup) {
-                    msg.append(format("commentStaffRow", new String[]{String.valueOf(comm.getID()),
+                    msg.append(i18n.format("commentStaffRow", new String[]{String.valueOf(comm.getID()),
                             (comm.getType() == Type.NOTE) ? "&eComment" : "&cWarning",
                             comm.getEntity(), comm.getContent(), comm.getFormattedDate()}));
                 } else {
-                    msg.append(format("commentRow", new String[]{String.valueOf(comm.getID()),
+                    msg.append(i18n.format("commentRow", new String[]{String.valueOf(comm.getID()),
                             (comm.getType() == Type.NOTE) ? "&eComment" : "&cWarning", comm.getContent(),
                             comm.getFormattedDate(), comm.getAuthor()}));
                 }
@@ -616,7 +611,7 @@ public class LookupFormatter {
             msg.append(lookupFooter.replace("{entity}", entity).replace("{module}", "Comment")
                     .replace("{page}", page + "/" + totalPages));
 
-            return FormatUtils.formatNewLine(ChatColor.translateAlternateColorCodes('&', msg.toString()));
+            return FormatUtilsKt.formatNewLine(ChatColor.translateAlternateColorCodes('&', msg.toString()));
         }
     }
 }

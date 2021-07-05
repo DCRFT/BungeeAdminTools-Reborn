@@ -3,7 +3,6 @@ package me.starmism.batr.utils;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import me.starmism.batr.BATR;
-import me.starmism.batr.modules.InvalidModuleException;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -48,7 +47,7 @@ public class RedisUtils implements Listener {
 			case "gkick" -> receiveGKickPlayer(message[2], message[3]);
 			case "message" -> receiveMessagePlayer(message[2], message[3]);
 			case "broadcast" -> receiveBroadcast(message[2], message[3]);
-			case "muteupdate" -> receiveMuteUpdatePlayer(message[2], message[3]);
+			case "muteupdate" -> receiveMuteUpdatePlayer(message[2]);
 			case "movedefaultserver" -> receiveMoveDefaultServerPlayer(message[2]);
 			default -> BATR.getInstance().getLogger().warning("Undeclared BungeeAdminTool redis message received: " + messageType);
 		}
@@ -100,14 +99,11 @@ public class RedisUtils implements Listener {
         sendMessage("muteupdate", pUUID.toString() + split + server);
     }
 
-    private void receiveMuteUpdatePlayer(String sUUID, String server) {
+    private void receiveMuteUpdatePlayer(String sUUID) {
         if (BATR.getInstance().getModules().isLoaded("mute")) {
             ProxiedPlayer player = BATR.getInstance().getProxy().getPlayer(UUID.fromString(sUUID));
             if (player != null) {
-                try {
-                    BATR.getInstance().getModules().getMuteModule().updateMuteData(player.getName());
-                } catch (InvalidModuleException ignored) {
-                }
+                BATR.getInstance().getModules().getMuteModule().updateMuteData(player.getName());
             }
         } else {
             throw new IllegalStateException("The mute module isn't enabled. The mute message can't be handled.");

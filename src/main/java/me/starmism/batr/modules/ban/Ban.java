@@ -6,12 +6,13 @@ import me.mattstudios.config.SettingsManager;
 import me.starmism.batr.BATR;
 import me.starmism.batr.database.DataSourceHandler;
 import me.starmism.batr.database.SQLQueries;
+import me.starmism.batr.i18n.I18n;
 import me.starmism.batr.modules.BATCommand;
 import me.starmism.batr.modules.IModule;
 import me.starmism.batr.modules.core.Core;
-import me.starmism.batr.utils.FormatUtils;
+import me.starmism.batr.utils.FormatUtilsKt;
 import me.starmism.batr.utils.UUIDNotFoundException;
-import me.starmism.batr.utils.Utils;
+import me.starmism.batr.utils.UtilsKt;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -28,16 +29,16 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static me.starmism.batr.i18n.I18n.format;
-
 public class Ban implements IModule, Listener {
 	private final SettingsManager config;
     private ScheduledTask task;
     private BanCommand commandHandler;
+    private I18n i18n;
 
     public Ban() {
         config = SettingsManager.from(Path.of(BATR.getInstance().getDataFolder().getPath(), "ban.yml"))
 				.configurationData(BanConfig.class).create();
+        i18n = BATR.getInstance().getI18n();
     }
 
     @Override
@@ -58,6 +59,11 @@ public class Ban implements IModule, Listener {
     @Override
     public SettingsManager getConfig() {
         return config;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return config.get(BanConfig.ENABLED);
     }
 
     @Override
@@ -159,11 +165,11 @@ public class Ban implements IModule, Listener {
             DataSourceHandler.close(statement, resultSet);
         }
         if (expiration != null) {
-            return TextComponent.fromLegacyText(format("isBannedTemp",
-                    new String[]{reason, (expiration.getTime() < System.currentTimeMillis()) ? "a few moments" : FormatUtils.getDuration(expiration.getTime()),
+            return TextComponent.fromLegacyText(i18n.format("isBannedTemp",
+                    new String[]{reason, (expiration.getTime() < System.currentTimeMillis()) ? "a few moments" : FormatUtilsKt.getDuration(expiration.getTime()),
                             Core.defaultDF.format(begin), staff}));
         } else {
-            return TextComponent.fromLegacyText(format("isBanned", new String[]{reason, Core.defaultDF.format(begin), staff}));
+            return TextComponent.fromLegacyText(i18n.format("isBanned", new String[]{reason, Core.defaultDF.format(begin), staff}));
         }
     }
 
@@ -192,7 +198,7 @@ public class Ban implements IModule, Listener {
         ResultSet resultSet = null;
         try (Connection conn = BATR.getConnection()) {
             // If this is an ip which may be banned
-            if (Utils.validIP(bannedEntity)) {
+            if (UtilsKt.validIP(bannedEntity)) {
 				statement = conn.prepareStatement((ANY_SERVER.equals(server)) ? SQLQueries.Ban.isBanIP
                         : SQLQueries.Ban.isBanServerIP);
                 statement.setString(1, bannedEntity);
@@ -236,7 +242,7 @@ public class Ban implements IModule, Listener {
                       final long expirationTimestamp, final String reason) {
         try (Connection conn = BATR.getConnection()) {
             // If the bannedEntity is an ip
-            if (Utils.validIP(bannedEntity)) {
+            if (UtilsKt.validIP(bannedEntity)) {
 
 				final PreparedStatement statement = conn.prepareStatement(SQLQueries.Ban.createBanIP);
                 statement.setString(1, bannedEntity);
@@ -248,15 +254,15 @@ public class Ban implements IModule, Listener {
                 statement.close();
 
                 for (final ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
-                    if (Utils.getPlayerIP(player).equals(bannedEntity) && (GLOBAL_SERVER.equals(server) || server.equalsIgnoreCase(player.getServer().getInfo().getName()))) {
-                        BATR.kick(player, format("wasBannedNotif", new String[]{reason}));
+                    if (UtilsKt.getPlayerIP(player).equals(bannedEntity) && (GLOBAL_SERVER.equals(server) || server.equalsIgnoreCase(player.getServer().getInfo().getName()))) {
+                        BATR.kick(player, i18n.format("wasBannedNotif", new String[]{reason}));
                     }
                 }
 
                 if (BATR.getInstance().getRedis().isRedisEnabled()) {
                     for (final UUID pUUID : RedisBungee.getApi().getPlayersOnline()) {
                         if (RedisBungee.getApi().getPlayerIp(pUUID).toString().equals(bannedEntity) && (GLOBAL_SERVER.equals(server) || server.equalsIgnoreCase(RedisBungee.getApi().getServerFor(pUUID).getName()))) {
-                            BATR.getInstance().getRedis().sendGKickPlayer(pUUID, format("wasBannedNotif", new String[]{reason}));
+                            BATR.getInstance().getRedis().sendGKickPlayer(pUUID, i18n.format("wasBannedNotif", new String[]{reason}));
                         }
                     }
                 }
@@ -266,7 +272,7 @@ public class Ban implements IModule, Listener {
             // Otherwise it's a player
             else {
                 final String sUUID = Core.getUUID(bannedEntity);
-                final ProxiedPlayer player = Utils.getPlayer(bannedEntity);
+                final ProxiedPlayer player = UtilsKt.getPlayer(bannedEntity);
                 final PreparedStatement statement = conn.prepareStatement(SQLQueries.Ban.createBan);
                 statement.setString(1, sUUID);
                 statement.setString(2, staff);
@@ -280,21 +286,21 @@ public class Ban implements IModule, Listener {
                 // banned
                 if (player != null
                         && (server.equals(GLOBAL_SERVER) || player.getServer().getInfo().getName().equalsIgnoreCase(server))) {
-                    BATR.kick(player, format("wasBannedNotif", new String[]{reason}));
+                    BATR.kick(player, i18n.format("wasBannedNotif", new String[]{reason}));
                 } else if (BATR.getInstance().getRedis().isRedisEnabled()) {
                     UUID pUUID = RedisBungee.getApi().getUuidFromName(bannedEntity);
                     if (RedisBungee.getApi().isPlayerOnline(pUUID)
                             && ((server.equals(GLOBAL_SERVER) || RedisBungee.getApi().getServerFor(pUUID).getName().equalsIgnoreCase(server)))) {
-                        BATR.getInstance().getRedis().sendGKickPlayer(pUUID, format("wasBannedNotif", new String[]{reason}));
+                        BATR.getInstance().getRedis().sendGKickPlayer(pUUID, i18n.format("wasBannedNotif", new String[]{reason}));
                     }
                 }
 
 			}
 			if (expirationTimestamp > 0) {
-				return format("banTempBroadcast", new String[]{bannedEntity, FormatUtils.getDuration(expirationTimestamp),
+				return i18n.format("banTempBroadcast", new String[]{bannedEntity, FormatUtilsKt.getDuration(expirationTimestamp),
 						staff, server, reason});
 			} else {
-				return format("banBroadcast", new String[]{bannedEntity, staff, server, reason});
+				return i18n.format("banBroadcast", new String[]{bannedEntity, staff, server, reason});
 			}
 		} catch (final SQLException e) {
             return DataSourceHandler.handleException(e);
@@ -312,15 +318,15 @@ public class Ban implements IModule, Listener {
      */
     public String banIP(final ProxiedPlayer player, final String server, final String staff,
                         final long expirationTimestamp, final String reason) {
-        ban(Utils.getPlayerIP(player), server, staff, expirationTimestamp, reason);
-        return format("banBroadcast", new String[]{player.getName() + "'s IP", staff, server, reason});
+        ban(UtilsKt.getPlayerIP(player), server, staff, expirationTimestamp, reason);
+        return i18n.format("banBroadcast", new String[]{player.getName() + "'s IP", staff, server, reason});
     }
 
     public String banRedisIP(final UUID pUUID, final String server, final String staff,
                              final long expirationTimestamp, final String reason) {
         if (BATR.getInstance().getRedis().isRedisEnabled() && RedisBungee.getApi().isPlayerOnline(pUUID)) {
             ban(RedisBungee.getApi().getPlayerIp(pUUID).getHostAddress(), server, staff, expirationTimestamp, reason);
-            return format("banBroadcast", new String[]{RedisBungee.getApi().getNameFromUuid(pUUID) + "'s IP", staff, server, reason});
+            return i18n.format("banBroadcast", new String[]{RedisBungee.getApi().getNameFromUuid(pUUID) + "'s IP", staff, server, reason});
         } else {
             return null;
         }
@@ -340,7 +346,7 @@ public class Ban implements IModule, Listener {
         PreparedStatement statement = null;
         try (Connection conn = BATR.getConnection()) {
             // If the bannedEntity is an ip
-            if (Utils.validIP(bannedEntity)) {
+            if (UtilsKt.validIP(bannedEntity)) {
                 if (ANY_SERVER.equals(server)) {
                     statement = (DataSourceHandler.isSQLite()) ? conn.prepareStatement(SQLQueries.Ban.SQLite.unBanIP)
                             : conn.prepareStatement(SQLQueries.Ban.unBanIP);
@@ -358,7 +364,7 @@ public class Ban implements IModule, Listener {
                 }
                 statement.executeUpdate();
 
-                return format("unbanBroadcast", new String[]{bannedEntity, staff, server, reason});
+                return i18n.format("unbanBroadcast", new String[]{bannedEntity, staff, server, reason});
             }
 
             // Otherwise it's a player
@@ -381,7 +387,7 @@ public class Ban implements IModule, Listener {
                 }
                 statement.executeUpdate();
 
-                return format("unbanBroadcast", new String[]{bannedEntity, staff, server, reason});
+                return i18n.format("unbanBroadcast", new String[]{bannedEntity, staff, server, reason});
             }
         } catch (final SQLException e) {
             return DataSourceHandler.handleException(e);
@@ -401,11 +407,11 @@ public class Ban implements IModule, Listener {
      * @param reason | optional
      */
     public String unBanIP(final String entity, final String server, final String staff, final String reason) {
-        if (Utils.validIP(entity)) {
+        if (UtilsKt.validIP(entity)) {
             return unBan(entity, server, staff, reason);
         } else {
             unBan(Core.getPlayerIP(entity), server, staff, reason);
-            return format("unbanBroadcast", new String[]{entity + "'s IP", staff, server, reason});
+            return i18n.format("unbanBroadcast", new String[]{entity + "'s IP", staff, server, reason});
         }
     }
 
@@ -422,7 +428,7 @@ public class Ban implements IModule, Listener {
         ResultSet resultSet = null;
         try (Connection conn = BATR.getConnection()) {
             // If the entity is an ip
-            if (Utils.validIP(entity)) {
+            if (UtilsKt.validIP(entity)) {
                 statement = conn.prepareStatement((DataSourceHandler.isSQLite())
                         ? SQLQueries.Ban.SQLite.getBanIP
                         : SQLQueries.Ban.getBanIP);

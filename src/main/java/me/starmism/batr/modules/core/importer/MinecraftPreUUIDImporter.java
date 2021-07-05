@@ -5,7 +5,7 @@ import me.starmism.batr.database.SQLQueries;
 import me.starmism.batr.modules.IModule;
 import me.starmism.batr.utils.CallbackUtils.ProgressCallback;
 import me.starmism.batr.utils.UUIDNotFoundException;
-import me.starmism.batr.utils.Utils;
+import me.starmism.batr.utils.UtilsKt;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -132,7 +132,7 @@ public class MinecraftPreUUIDImporter extends Importer {
             if (splittedLine.length != 5) {
                 throw new RuntimeException("Invalid ban format. The import process will continue...");
             }
-            if (Utils.validIP(splittedLine[0])) {
+            if (UtilsKt.validIP(splittedLine[0])) {
                 ip = splittedLine[0];
             } else {
                 try {

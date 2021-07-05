@@ -10,9 +10,9 @@ import me.starmism.batr.modules.BATCommand;
 import me.starmism.batr.modules.CommandHandler;
 import me.starmism.batr.modules.IModule;
 import me.starmism.batr.modules.core.Core;
-import me.starmism.batr.utils.FormatUtils;
+import me.starmism.batr.utils.FormatUtilsKt;
 import me.starmism.batr.utils.UUIDNotFoundException;
-import me.starmism.batr.utils.Utils;
+import me.starmism.batr.utils.UtilsKt;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -32,9 +32,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import static me.starmism.batr.i18n.I18n.format;
-import static me.starmism.batr.i18n.I18n.formatPrefix;
-
 /**
  * This module handles all the mute.<br>
  * The mute data of online players are <b>cached</b> in order to avoid lag.
@@ -44,10 +41,12 @@ public class Mute implements IModule, Listener {
     private ConcurrentHashMap<String, PlayerMuteData> mutedPlayers;
     private CommandHandler commandHandler;
     private ScheduledTask task;
+    private final I18n i18n;
 
     public Mute() {
         config = SettingsManager.from(Path.of(BATR.getInstance().getDataFolder().getPath(), "mute.yml"))
                 .configurationData(MuteConfig.class).create();
+        i18n = BATR.getInstance().getI18n();
     }
 
     @Override
@@ -68,6 +67,11 @@ public class Mute implements IModule, Listener {
     @Override
     public String getName() {
         return "mute";
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return config.get(MuteConfig.ENABLED);
     }
 
     @Override
@@ -153,10 +157,10 @@ public class Mute implements IModule, Listener {
             DataSourceHandler.close(statement, resultSet);
         }
         if (expiration != null) {
-            mutedPlayers.get(pName).setMuteMessage(format("isMuteTemp",
+            mutedPlayers.get(pName).setMuteMessage(i18n.format("isMuteTemp",
                     new String[]{reason, "{expiration}", Core.defaultDF.format(begin), staff}), expiration);
         } else {
-            mutedPlayers.get(pName).setMuteMessage(format("isMute",
+            mutedPlayers.get(pName).setMuteMessage(i18n.format("isMute",
                     new String[]{reason, Core.defaultDF.format(begin), staff}), null);
         }
     }
@@ -213,7 +217,7 @@ public class Mute implements IModule, Listener {
         ResultSet resultSet = null;
         try (Connection conn = BATR.getConnection()) {
             // If this is an ip which may be muted
-            if (Utils.validIP(mutedEntity)) {
+            if (UtilsKt.validIP(mutedEntity)) {
                 statement = conn.prepareStatement((ANY_SERVER.equals(server)) ? SQLQueries.Mute.isMuteIP
                         : SQLQueries.Mute.isMuteServerIP);
                 statement.setString(1, mutedEntity);
@@ -259,7 +263,7 @@ public class Mute implements IModule, Listener {
                        final long expirationTimestamp, final String reason) {
         PreparedStatement statement = null;
         try (Connection conn = BATR.getConnection()) {
-            if (Utils.validIP(mutedEntity)) {
+            if (UtilsKt.validIP(mutedEntity)) {
                 statement = conn.prepareStatement(SQLQueries.Mute.createMuteIP);
                 statement.setString(1, mutedEntity);
                 statement.setString(2, staff);
@@ -276,34 +280,28 @@ public class Mute implements IModule, Listener {
                             if (server.equals(GLOBAL_SERVER) || RedisBungee.getApi().getServerFor(pUUID).getName().equalsIgnoreCase(server)) {
                                 ProxiedPlayer player = ProxyServer.getInstance().getPlayer(pUUID);
                                 if (player != null) {
-                                    player.sendMessage(I18n.formatPrefix("wasMutedNotif", new String[]{reason}));
+                                    player.sendMessage(i18n.formatPrefix("wasMutedNotif", new String[]{reason}));
                                 } else {
-                                    BATR.getInstance().getRedis().sendMessagePlayer(pUUID, TextComponent.toLegacyText(I18n.formatPrefix("wasMutedNotif", new String[]{reason})));
+                                    BATR.getInstance().getRedis().sendMessagePlayer(pUUID, TextComponent.toLegacyText(i18n.formatPrefix("wasMutedNotif", new String[]{reason})));
                                 }
                             }
                         }
                     }
                 } else {
                     for (final ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
-                        if (Utils.getPlayerIP(player).equals(mutedEntity)) {
+                        if (UtilsKt.getPlayerIP(player).equals(mutedEntity)) {
                             if (server.equals(GLOBAL_SERVER)) {
                                 mutedPlayers.get(player.getName()).setGlobal();
                             } else {
                                 mutedPlayers.get(player.getName()).addServer(server);
                             }
                             if (server.equals(GLOBAL_SERVER) || player.getServer().getInfo().getName().equalsIgnoreCase(server)) {
-                                player.sendMessage(I18n.formatPrefix("wasMutedNotif", new String[]{reason}));
+                                player.sendMessage(i18n.formatPrefix("wasMutedNotif", new String[]{reason}));
                             }
                         }
                     }
                 }
 
-                if (expirationTimestamp > 0) {
-                    return format("muteTempBroadcast", new String[]{mutedEntity, FormatUtils.getDuration(expirationTimestamp),
-                            staff, server, reason});
-                } else {
-                    return format("muteBroadcast", new String[]{mutedEntity, staff, server, reason});
-                }
             }
 
             // Otherwise it's a player
@@ -321,21 +319,22 @@ public class Mute implements IModule, Listener {
                 if (player != null) {
                     updateMuteData(player.getName());
                     if (server.equals(GLOBAL_SERVER) || player.getServer().getInfo().getName().equalsIgnoreCase(server)) {
-                        player.sendMessage(I18n.formatPrefix("wasMutedNotif", new String[]{reason}));
+                        player.sendMessage(i18n.formatPrefix("wasMutedNotif", new String[]{reason}));
                     }
                 } else if (BATR.getInstance().getRedis().isRedisEnabled()) {
                     //Need to implement a function to get an UUID object instead of a string one.
                     final UUID pUUID = Core.getUUIDfromString(Core.getUUID(mutedEntity));
                     BATR.getInstance().getRedis().sendMuteUpdatePlayer(pUUID, server);
-                    BATR.getInstance().getRedis().sendMessagePlayer(pUUID, TextComponent.toLegacyText(I18n.formatPrefix("wasMutedNotif", new String[]{reason})));
-                }
-                if (expirationTimestamp > 0) {
-                    return format("muteTempBroadcast", new String[]{mutedEntity, FormatUtils.getDuration(expirationTimestamp),
-                            staff, server, reason});
-                } else {
-                    return format("muteBroadcast", new String[]{mutedEntity, staff, server, reason});
+                    BATR.getInstance().getRedis().sendMessagePlayer(pUUID, TextComponent.toLegacyText(i18n.formatPrefix("wasMutedNotif", new String[]{reason})));
                 }
 
+            }
+
+            if (expirationTimestamp > 0) {
+                return i18n.format("muteTempBroadcast", new String[]{mutedEntity, FormatUtilsKt.getDuration(expirationTimestamp),
+                        staff, server, reason});
+            } else {
+                return i18n.format("muteBroadcast", new String[]{mutedEntity, staff, server, reason});
             }
         } catch (final SQLException e) {
             return DataSourceHandler.handleException(e);
@@ -355,8 +354,8 @@ public class Mute implements IModule, Listener {
      */
     public String muteIP(final ProxiedPlayer player, final String server, final String staff,
                          final long expirationTimestamp, final String reason) {
-        mute(Utils.getPlayerIP(player), server, staff, expirationTimestamp, reason);
-        return format("muteBroadcast", new String[]{player.getName() + "'s IP", staff, server, reason});
+        mute(UtilsKt.getPlayerIP(player), server, staff, expirationTimestamp, reason);
+        return i18n.format("muteBroadcast", new String[]{player.getName() + "'s IP", staff, server, reason});
     }
 
     /**
@@ -372,7 +371,7 @@ public class Mute implements IModule, Listener {
         PreparedStatement statement = null;
         try (Connection conn = BATR.getConnection()) {
             // If the mutedEntity is an ip
-            if (Utils.validIP(mutedEntity)) {
+            if (UtilsKt.validIP(mutedEntity)) {
                 if (ANY_SERVER.equals(server)) {
                     statement = (DataSourceHandler.isSQLite()) ? conn.prepareStatement(SQLQueries.Mute.SQLite.unMuteIP)
                             : conn.prepareStatement(SQLQueries.Mute.unMuteIP);
@@ -391,7 +390,7 @@ public class Mute implements IModule, Listener {
                 statement.executeUpdate();
                 statement.close();
 
-                return format("unmuteBroadcast", new String[]{mutedEntity, staff, server, reason});
+                return i18n.format("unmuteBroadcast", new String[]{mutedEntity, staff, server, reason});
             }
 
             // Otherwise it's a player
@@ -418,18 +417,18 @@ public class Mute implements IModule, Listener {
                 if (player != null) {
                     updateMuteData(player.getName());
                     if (ANY_SERVER.equals(server) || GLOBAL_SERVER.equals(server) || player.getServer().getInfo().getName().equalsIgnoreCase(server)) {
-                        player.sendMessage(I18n.formatPrefix("wasUnmutedNotif", new String[]{reason}));
+                        player.sendMessage(i18n.formatPrefix("wasUnmutedNotif", new String[]{reason}));
                     }
                 } else if (BATR.getInstance().getRedis().isRedisEnabled()) {
                     final UUID pUUID = Core.getUUIDfromString(Core.getUUID(mutedEntity));
                     ServerInfo pServer = RedisBungee.getApi().getServerFor(pUUID);
                     if (ANY_SERVER.equals(server) || GLOBAL_SERVER.equals(server) || (pServer != null && pServer.getName().equalsIgnoreCase(server))) {
                         BATR.getInstance().getRedis().sendMuteUpdatePlayer(pUUID, server);
-                        BATR.getInstance().getRedis().sendMessagePlayer(pUUID, TextComponent.toLegacyText(I18n.formatPrefix("wasUnmutedNotif", new String[]{reason})));
+                        BATR.getInstance().getRedis().sendMessagePlayer(pUUID, TextComponent.toLegacyText(i18n.formatPrefix("wasUnmutedNotif", new String[]{reason})));
                     }
                 }
 
-                return format("unmuteBroadcast", new String[]{mutedEntity, staff, server, reason});
+                return i18n.format("unmuteBroadcast", new String[]{mutedEntity, staff, server, reason});
             }
         } catch (final SQLException e) {
             return DataSourceHandler.handleException(e);
@@ -449,12 +448,12 @@ public class Mute implements IModule, Listener {
      *               ; set to 0 for mute def
      */
     public String unMuteIP(final String entity, final String server, final String staff, final String reason) {
-        if (Utils.validIP(entity)) {
+        if (UtilsKt.validIP(entity)) {
             return unMute(entity, server, staff, reason);
         } else {
             unMute(Core.getPlayerIP(entity), server, staff, reason);
             updateMuteData(entity);
-            return format("unmuteBroadcast", new String[]{entity + "'s IP", staff, server, reason});
+            return i18n.format("unmuteBroadcast", new String[]{entity + "'s IP", staff, server, reason});
         }
     }
 
@@ -471,7 +470,7 @@ public class Mute implements IModule, Listener {
         ResultSet resultSet = null;
         try (Connection conn = BATR.getConnection()) {
             // If the entity is an ip
-            if (Utils.validIP(entity)) {
+            if (UtilsKt.validIP(entity)) {
                 statement = conn.prepareStatement((DataSourceHandler.isSQLite())
                         ? SQLQueries.Mute.SQLite.getMuteIP
                         : SQLQueries.Mute.getMuteIP);
@@ -536,7 +535,7 @@ public class Mute implements IModule, Listener {
             pMuteData.clearServers();
             pMuteData.unsetGlobal();
         } else {
-            pMuteData = new PlayerMuteData(pName, new ArrayList<>());
+            pMuteData = new PlayerMuteData(pName);
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -696,7 +695,7 @@ public class Mute implements IModule, Listener {
             player.sendMessage(mutedPlayers.get(player.getName()).getMuteMessage(this));
             e.setCancelled(true);
         } else if (muteState == -1) {
-            player.sendMessage(formatPrefix("loadingMutedata"));
+            player.sendMessage(i18n.formatPrefix("loadingMutedata"));
             e.setCancelled(true);
         }
     }
@@ -709,9 +708,11 @@ public class Mute implements IModule, Listener {
         private final List<String> servers;
         private boolean globalMute = false;
         private Map.Entry<String, Timestamp> muteMessage;
+        private final I18n i18n;
 
-        public PlayerMuteData(final String pName, final List<String> servers) {
+        public PlayerMuteData(final String pName) {
             this.pName = pName;
+            this.i18n = BATR.getInstance().getI18n();
             // Override the arraylist implementation to make used methods non-case sensitive
             this.servers = new ArrayList<>() {
                 @Override
@@ -768,7 +769,7 @@ public class Mute implements IModule, Listener {
             if (muteMessage != null) {
                 if (muteMessage.getValue() != null) {
                     if (muteMessage.getValue().getTime() >= System.currentTimeMillis()) {
-                        return BATR.convertStringToComponent(muteMessage.getKey().replace("{expiration}", FormatUtils.getDuration(muteMessage.getValue().getTime())));
+                        return BATR.convertStringToComponent(muteMessage.getKey().replace("{expiration}", FormatUtilsKt.getDuration(muteMessage.getValue().getTime())));
                     }
                     // If it's not synchronized with the db, force the update of mute data
                     else {
@@ -791,7 +792,7 @@ public class Mute implements IModule, Listener {
                     return BATR.convertStringToComponent(muteMessage.getKey());
                 }
             }
-            return I18n.formatPrefix("wasUnmutedNotif", new String[]{NO_REASON});
+            return i18n.formatPrefix("wasUnmutedNotif", new String[]{NO_REASON});
         }
 
         public void setMuteMessage(final String messagePattern, final Timestamp expiration) {

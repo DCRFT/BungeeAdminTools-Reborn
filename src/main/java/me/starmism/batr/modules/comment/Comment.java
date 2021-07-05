@@ -10,7 +10,7 @@ import me.starmism.batr.modules.BATCommand;
 import me.starmism.batr.modules.IModule;
 import me.starmism.batr.modules.comment.CommentEntry.Type;
 import me.starmism.batr.modules.core.Core;
-import me.starmism.batr.utils.Utils;
+import me.starmism.batr.utils.UtilsKt;
 
 import java.nio.file.Path;
 import java.sql.*;
@@ -19,10 +19,12 @@ import java.util.List;
 public class Comment implements IModule {
     private final SettingsManager config;
     private CommentCommand commandHandler;
+    private final I18n i18n;
 
     public Comment() {
         config = SettingsManager.from(Path.of(BATR.getInstance().getDataFolder().getPath(), "comment.yml"))
                 .configurationData(CommentConfig.class).create();
+        i18n = BATR.getInstance().getI18n();
     }
 
     @Override
@@ -43,6 +45,11 @@ public class Comment implements IModule {
     @Override
     public SettingsManager getConfig() {
         return config;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return config.get(CommentConfig.ENABLED);
     }
 
     @Override
@@ -81,7 +88,7 @@ public class Comment implements IModule {
      * Get the notes relative to an entity
      *
      * @param entity | can be an ip or a player name
-     * @return
+     * @return The notes
      */
     public List<CommentEntry> getComments(final String entity) {
         List<CommentEntry> notes = Lists.newArrayList();
@@ -91,7 +98,7 @@ public class Comment implements IModule {
             statement = conn.prepareStatement(DataSourceHandler.isSQLite()
                     ? SQLQueries.Comments.SQLite.getEntries
                     : SQLQueries.Comments.getEntries);
-            if (Utils.validIP(entity)) {
+            if (UtilsKt.validIP(entity)) {
                 statement.setString(1, entity);
             } else {
                 statement.setString(1, Core.getUUID(entity));
@@ -154,7 +161,7 @@ public class Comment implements IModule {
         PreparedStatement statement = null;
         try (Connection conn = BATR.getConnection()) {
             statement = conn.prepareStatement(SQLQueries.Comments.insertEntry);
-            statement.setString(1, (Utils.validIP(entity)) ? entity : Core.getUUID(entity));
+            statement.setString(1, (UtilsKt.validIP(entity)) ? entity : Core.getUUID(entity));
             statement.setString(2, comment);
             statement.setString(3, type.name());
             statement.setString(4, author);
@@ -200,19 +207,19 @@ public class Comment implements IModule {
     /**
      * Clear all the comments and warning of an entity or the specified one
      *
-     * @param entity
+     * @param entity The entity to clear
      * @param commentID | use -1 to remove all the comments
-     * @return
+     * @return The cleared message
      */
     public String clearComments(final String entity, final int commentID) {
         PreparedStatement statement = null;
         try (Connection conn = BATR.getConnection()) {
             if (commentID == -1) {
                 statement = conn.prepareStatement(SQLQueries.Comments.clearEntries);
-                statement.setString(1, (Utils.validIP(entity)) ? entity : Core.getUUID(entity));
+                statement.setString(1, (UtilsKt.validIP(entity)) ? entity : Core.getUUID(entity));
             } else {
                 statement = conn.prepareStatement(SQLQueries.Comments.clearByID);
-                statement.setString(1, (Utils.validIP(entity)) ? entity : Core.getUUID(entity));
+                statement.setString(1, (UtilsKt.validIP(entity)) ? entity : Core.getUUID(entity));
                 statement.setInt(2, commentID);
             }
             // Check if it was successfully deleted, will be used if tried to delete an specific id comment
@@ -220,12 +227,12 @@ public class Comment implements IModule {
 
             if (commentID != -1) {
                 if (!deleted) {
-                    throw new IllegalArgumentException(I18n.format("noCommentIDFound", new String[]{entity}));
+                    throw new IllegalArgumentException(i18n.format("noCommentIDFound", new String[]{entity}));
                 }
-                return I18n.format("commentIDCleared", new String[]{String.valueOf(commentID), entity});
+                return i18n.format("commentIDCleared", new String[]{String.valueOf(commentID), entity});
             }
 
-            return I18n.format("commentsCleared", new String[]{entity});
+            return i18n.format("commentsCleared", new String[]{entity});
         } catch (final SQLException e) {
             return DataSourceHandler.handleException(e);
         } finally {

@@ -46,9 +46,10 @@ public class BATR extends Plugin {
     private SettingsManager config;
     private ModulesManager modules;
     private RedisUtils redis;
+    private I18n i18n;
 
     public static BATR getInstance() {
-        return BATR.instance;
+        return instance;
     }
 
     public static BaseComponent[] convertStringToComponent(final String message) {
@@ -65,8 +66,8 @@ public class BATR extends Plugin {
      */
     public static void broadcast(final String message, final String perm) {
         noRedisBroadcast(message, perm);
-        if (BATR.getInstance().getRedis().isRedisEnabled()) {
-            BATR.getInstance().getRedis().sendBroadcast(perm, message);
+        if (getInstance().getRedis().isRedisEnabled()) {
+            getInstance().getRedis().sendBroadcast(perm, message);
         }
     }
 
@@ -101,7 +102,7 @@ public class BATR extends Plugin {
      */
     public static void kick(final ProxiedPlayer player, final String reason) {
         if (reason == null || reason.equals("")) {
-            player.disconnect(TextComponent.fromLegacyText("You have been disconnected of the server."));
+            player.disconnect(TextComponent.fromLegacyText("You have been kicked from the server."));
         } else {
             player.disconnect(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', reason)));
         }
@@ -112,6 +113,8 @@ public class BATR extends Plugin {
         instance = this;
         config = SettingsManager.from(Path.of(instance.getDataFolder().getPath(), "config.yml")).configurationData(Configuration.class).create();
         getLogger().setLevel(Level.INFO);
+        // Init the I18n module
+        i18n = new I18n();
 
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
@@ -172,8 +175,6 @@ public class BATR extends Plugin {
                 getLogger().severe("BATR is gonna shutdown because it can't connect to the database.");
                 return;
             }
-            // Init the I18n module
-            I18n.getString("global");
         });
     }
 
@@ -258,6 +259,10 @@ public class BATR extends Plugin {
         }
     }
 
+    public void reloadI18n() {
+        i18n = new I18n();
+    }
+
     public ModulesManager getModules() {
         return modules;
     }
@@ -272,6 +277,10 @@ public class BATR extends Plugin {
 
     public RedisUtils getRedis() {
         return redis;
+    }
+
+    public I18n getI18n() {
+        return i18n;
     }
 
 }

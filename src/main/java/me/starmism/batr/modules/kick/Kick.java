@@ -5,6 +5,7 @@ import me.mattstudios.config.SettingsManager;
 import me.starmism.batr.BATR;
 import me.starmism.batr.database.DataSourceHandler;
 import me.starmism.batr.database.SQLQueries;
+import me.starmism.batr.i18n.I18n;
 import me.starmism.batr.modules.BATCommand;
 import me.starmism.batr.modules.IModule;
 import me.starmism.batr.modules.core.Core;
@@ -18,15 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static me.starmism.batr.i18n.I18n.format;
-
 public class Kick implements IModule {
 	private final SettingsManager config;
     private KickCommand commandHandler;
+    private final I18n i18n;
 
     public Kick() {
         config = SettingsManager.from(Path.of(BATR.getInstance().getDataFolder().getPath(), "kick.yml"))
 				.configurationData(KickConfig.class).create();
+        i18n = BATR.getInstance().getI18n();
     }
 
     @Override
@@ -47,6 +48,11 @@ public class Kick implements IModule {
     @Override
     public SettingsManager getConfig() {
         return config;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return config.get(KickConfig.ENABLED);
     }
 
     @Override
@@ -83,14 +89,11 @@ public class Kick implements IModule {
 
     /**
      * Kick a player and tp him to the default server
-     *
-     * @param player
-     * @param reason
      */
     public String kick(final ProxiedPlayer player, final String staff, final String reason) {
         player.connect(ProxyServer.getInstance().getServerInfo(
                 player.getPendingConnection().getListener().getDefaultServer()));
-        player.sendMessage(TextComponent.fromLegacyText(format("wasKickedNotif", new String[]{reason})));
+        player.sendMessage(TextComponent.fromLegacyText(i18n.format("wasKickedNotif", new String[]{reason})));
         return kickSQL(player.getUniqueId(), player.getServer().getInfo().getName(), staff, reason);
     }
 
@@ -109,7 +112,7 @@ public class Kick implements IModule {
             statement.executeUpdate();
             statement.close();
 
-            return format("kickBroadcast", new String[]{Core.getPlayerName(pUUID.toString().replace("-", "")), staff, server, reason});
+            return i18n.format("kickBroadcast", new String[]{Core.getPlayerName(pUUID.toString().replace("-", "")), staff, server, reason});
         } catch (final SQLException e) {
             return DataSourceHandler.handleException(e);
         } finally {
@@ -125,7 +128,7 @@ public class Kick implements IModule {
      */
     public String gKick(final ProxiedPlayer player, final String staff, final String reason) {
         final String message = gKickSQL(player.getUniqueId(), staff, reason);
-        player.disconnect(TextComponent.fromLegacyText(format("wasKickedNotif", new String[]{reason})));
+        player.disconnect(TextComponent.fromLegacyText(i18n.format("wasKickedNotif", new String[]{reason})));
         return message;
     }
 
@@ -145,9 +148,9 @@ public class Kick implements IModule {
             statement.close();
 
             if (BATR.getInstance().getRedis().isRedisEnabled()) {
-                return format("gKickBroadcast", new String[]{RedisBungee.getApi().getNameFromUuid(pUUID), staff, reason});
+                return i18n.format("gKickBroadcast", new String[]{RedisBungee.getApi().getNameFromUuid(pUUID), staff, reason});
             } else {
-                return format("gKickBroadcast", new String[]{BATR.getInstance().getProxy().getPlayer(pUUID).getName(), staff, reason});
+                return i18n.format("gKickBroadcast", new String[]{BATR.getInstance().getProxy().getPlayer(pUUID).getName(), staff, reason});
             }
         } catch (final SQLException e) {
             return DataSourceHandler.handleException(e);

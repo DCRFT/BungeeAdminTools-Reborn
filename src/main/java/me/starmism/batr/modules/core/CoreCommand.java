@@ -18,8 +18,7 @@ import me.starmism.batr.modules.core.importer.Importer.ImportStatus;
 import me.starmism.batr.modules.kick.KickEntry;
 import me.starmism.batr.modules.mute.MuteEntry;
 import me.starmism.batr.utils.CallbackUtils.ProgressCallback;
-import me.starmism.batr.utils.FormatUtils;
-import me.starmism.batr.utils.Utils;
+import me.starmism.batr.utils.UtilsKt;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -32,12 +31,13 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static me.starmism.batr.i18n.I18n.formatPrefix;
+import static me.starmism.batr.utils.FormatUtilsKt.showFormattedHelp;
 
 public class CoreCommand extends BATCommand {
     private final BaseComponent[] CREDIT;
     private final BaseComponent[] HELP_MSG;
     private final Map<List<String>, BATCommand> subCmd;
+    private final I18n i18n;
 
 
     public CoreCommand(final Core coreModule) {
@@ -90,6 +90,8 @@ public class CoreCommand extends BATCommand {
             // Otherwise, do nothing just let the command in the subcommand map
         }
 
+        i18n = BATR.getInstance().getI18n();
+
         HELP_MSG = TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&',
                 "&eType &6" + ((simpleAliasesCommands.get("help")) ? "/help" : "/bat help") + "&e to get help"));
     }
@@ -122,10 +124,10 @@ public class CoreCommand extends BATCommand {
                 if (cmd.getBATPermission().isEmpty() || sender.hasPermission(cmd.getBATPermission()) || sender.hasPermission("bat.admin")) {
                     cmd.execute(sender, cleanArgs);
                 } else {
-                    sender.sendMessage(formatPrefix("noPerm"));
+                    sender.sendMessage(i18n.formatPrefix("noPerm"));
                 }
             } else {
-                sender.sendMessage(formatPrefix("invalidCommand"));
+                sender.sendMessage(i18n.formatPrefix("invalidCommand"));
             }
         }
     }
@@ -146,7 +148,7 @@ public class CoreCommand extends BATCommand {
                     cmdsList.add(cmd);
                 }
             }
-            FormatUtils.showFormattedHelp(cmdsList, sender, "CORE");
+            showFormattedHelp(cmdsList, sender, "CORE");
         }
     }
 
@@ -197,7 +199,7 @@ public class CoreCommand extends BATCommand {
                 throws IllegalArgumentException {
             sender.sendMessage(BATR.convertStringToComponent("Starting reload ..."));
             BATR.getInstance().getConfiguration().reload();
-            I18n.reload();
+            BATR.getInstance().reloadI18n();
             BATR.getInstance().getModules().unloadModules();
             BATR.getInstance().getModules().loadModules();
             sender.sendMessage(BATR.convertStringToComponent("Reload successfully executed ..."));
@@ -208,11 +210,13 @@ public class CoreCommand extends BATCommand {
     public static class LookupCmd extends BATCommand {
         private static LookupFormatter lookupFormatter;
         private final ModulesManager modules;
+        private final I18n i18n;
 
         public LookupCmd() {
             super("lookup", "<player/ip> [module] [page]", "Displays a player or an ip related information (universal or per module).", Action.LOOKUP.getPermission());
             modules = BATR.getInstance().getModules();
             lookupFormatter = new LookupFormatter();
+            i18n = BATR.getInstance().getI18n();
         }
 
         public static LookupFormatter getLookupFormatter() {
@@ -223,8 +227,8 @@ public class CoreCommand extends BATCommand {
         public void onCommand(final CommandSender sender, final String[] args, final boolean confirmedCmd)
                 throws IllegalArgumentException {
             final String entity = args[0];
-            if (Utils.validIP(entity)) {
-                checkArgument(sender.hasPermission("bat.admin") || sender.hasPermission(Action.LOOKUP.getPermission() + ".ip"), I18n.format("noPerm"));
+            if (UtilsKt.validIP(entity)) {
+                checkArgument(sender.hasPermission("bat.admin") || sender.hasPermission(Action.LOOKUP.getPermission() + ".ip"), i18n.format("noPerm"));
                 if (args.length == 1) {
                     for (final BaseComponent[] msg : lookupFormatter.getSummaryLookupIP(entity)) {
                         sender.sendMessage(msg);
@@ -258,7 +262,7 @@ public class CoreCommand extends BATCommand {
                                 message = lookupFormatter.formatBanLookup(entity, bans, page, false);
                             } else {
                                 message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent((!Utils.validIP(entity))
+                                message.add(BATR.convertStringToComponent((!UtilsKt.validIP(entity))
                                         ? "&eThe player &a" + entity + "&e has never been banned."
                                         : "&eThe IP &a" + entity + "&e has never been banned."));
                             }
@@ -269,7 +273,7 @@ public class CoreCommand extends BATCommand {
                                 message = lookupFormatter.formatMuteLookup(entity, mutes, page, false);
                             } else {
                                 message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent((!Utils.validIP(entity))
+                                message.add(BATR.convertStringToComponent((!UtilsKt.validIP(entity))
                                         ? "&eThe player &a" + entity + "&e has never been muted."
                                         : "&eThe IP &a" + entity + "&e has never been muted."));
                             }
@@ -280,7 +284,7 @@ public class CoreCommand extends BATCommand {
                                 message = lookupFormatter.formatKickLookup(entity, kicks, page, false);
                             } else {
                                 message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent((!Utils.validIP(entity))
+                                message.add(BATR.convertStringToComponent((!UtilsKt.validIP(entity))
                                         ? "&eThe player &a" + entity + "&e has never been kicked."
                                         : "&eThe IP &a" + entity + "&e has never been kicked."));
                             }
@@ -291,7 +295,7 @@ public class CoreCommand extends BATCommand {
                                 message = lookupFormatter.commentRowLookup(entity, comments, page, false);
                             } else {
                                 message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent((!Utils.validIP(entity))
+                                message.add(BATR.convertStringToComponent((!UtilsKt.validIP(entity))
                                         ? "&eThe player &a" + entity + "&e has no comment about him."
                                         : "&eThe IP &a" + entity + "&e has no comment."));
                             }
@@ -398,15 +402,18 @@ public class CoreCommand extends BATCommand {
     }
 
     public static class ConfirmCmd extends BATCommand {
+        private final I18n i18n;
+
         public ConfirmCmd() {
             super("confirm", "", "Confirm your queued command.", "");
+            i18n = BATR.getInstance().getI18n();
         }
 
         @Override
         public void onCommand(final CommandSender sender, final String[] args, final boolean confirmedCmd)
                 throws IllegalArgumentException {
             if (!CommandQueue.executeQueueCommand(sender)) {
-                sender.sendMessage(formatPrefix("noQueuedCommand"));
+                sender.sendMessage(i18n.formatPrefix("noQueuedCommand"));
             }
         }
 
@@ -471,7 +478,7 @@ public class CoreCommand extends BATCommand {
                     public void onMinorError(String errorMessage) {
                         sender.sendMessage(BATR.convertStringToComponent(errorMessage));
                     }
-                }, Utils.getFinalArg(args, 1));
+                }, UtilsKt.getFinalArg(args, 1));
             } else {
                 throw new IllegalArgumentException("The specified source is incorrect. Available sources: &a"
                         + Joiner.on("&e,&a").join(importers.keySet()));

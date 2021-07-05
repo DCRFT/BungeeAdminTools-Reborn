@@ -7,7 +7,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 import me.starmism.batr.database.SQLQueries;
 import me.starmism.batr.utils.CallbackUtils.ProgressCallback;
-import me.starmism.batr.utils.MojangAPIProvider;
+import me.starmism.batr.utils.MojangAPIProviderKt;
 import me.starmism.batr.utils.UUIDNotFoundException;
 import net.md_5.bungee.api.ProxyServer;
 
@@ -21,7 +21,7 @@ public abstract class Importer {
             .expireAfterAccess(30, TimeUnit.MINUTES).build(new CacheLoader<>() {
                 public String load(final String pName) throws UUIDNotFoundException {
                     if (ProxyServer.getInstance().getConfig().isOnlineMode()) {
-                        String uuid = MojangAPIProvider.getUUID(pName);
+                        String uuid = MojangAPIProviderKt.getUUID(pName);
                         if (uuid != null) {
                             return uuid;
                         } else {

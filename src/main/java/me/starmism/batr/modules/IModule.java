@@ -51,4 +51,11 @@ public interface IModule {
      * @return list of commands
      */
 	List<BATCommand> getCommands();
+
+    /**
+     * Checks whether this module is enabled in the config
+     *
+     * @return Enabled status
+     */
+	boolean isEnabled();
 }
