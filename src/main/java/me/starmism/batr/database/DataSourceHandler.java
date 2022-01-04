@@ -19,7 +19,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
 
 import static java.lang.String.format;
 
@@ -80,6 +79,7 @@ public class DataSourceHandler {
                 BATR.getInstance().getLogger().log(Level.SEVERE, e.getMessage(), e);
             }
         }
+
         */
         sqlite = false;
     }
