@@ -9,7 +9,6 @@ import me.starmism.batr.i18n.I18n;
 import me.starmism.batr.modules.ModulesManager;
 import me.starmism.batr.modules.core.Core;
 import me.starmism.batr.utils.CallbackUtils;
-import me.starmism.batr.utils.RedisUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -45,7 +44,6 @@ public class BATR extends Plugin {
     private final int requiredBCBuild = 1576;
     private SettingsManager config;
     private ModulesManager modules;
-    private RedisUtils redis;
     private I18n i18n;
 
     public static BATR getInstance() {
@@ -66,9 +64,6 @@ public class BATR extends Plugin {
      */
     public static void broadcast(final String message, final String perm) {
         noRedisBroadcast(message, perm);
-        if (getInstance().getRedis().isRedisEnabled()) {
-            getInstance().getRedis().sendBroadcast(perm, message);
-        }
     }
 
     public static void noRedisBroadcast(final String message, final String perm) {
@@ -168,7 +163,6 @@ public class BATR extends Plugin {
             if (dbState) {
                 getLogger().config("Connection to the database established");
                 // Try enabling redis support.
-                redis = new RedisUtils(config.get(Configuration.REDIS_SUPPORT));
                 modules = new ModulesManager();
                 modules.loadModules();
             } else {
@@ -198,9 +192,6 @@ public class BATR extends Plugin {
 
     @Override
     public void onDisable() {
-        if (redis != null) {
-            getRedis().destroy();
-        }
         modules.unloadModules();
         instance = null;
     }
@@ -273,10 +264,6 @@ public class BATR extends Plugin {
 
     public DataSourceHandler getDsHandler() {
         return dsHandler;
-    }
-
-    public RedisUtils getRedis() {
-        return redis;
     }
 
     public I18n getI18n() {

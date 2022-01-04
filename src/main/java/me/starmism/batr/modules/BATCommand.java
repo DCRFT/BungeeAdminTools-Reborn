@@ -195,16 +195,6 @@ public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command impl
         }
         final String playerToCheck = args[args.length - 1];
         if (playerToCheck.length() > 0) {
-            if (BATR.getInstance().getRedis().isRedisEnabled()) {
-                for (final String player : RedisBungee.getApi().getHumanPlayersOnline()) {
-                    if (player
-                            .substring(
-                                    0,
-                                    Math.min(playerToCheck.length(), player.length())).equalsIgnoreCase(playerToCheck)) {
-                        result.add(player);
-                    }
-                }
-            } else {
                 for (final ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
                     if (player
                             .getName()
@@ -214,7 +204,6 @@ public abstract class BATCommand extends net.md_5.bungee.api.plugin.Command impl
                         result.add(player.getName());
                     }
                 }
-            }
         }
         return result;
     }

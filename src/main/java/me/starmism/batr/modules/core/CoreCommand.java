@@ -11,12 +11,9 @@ import me.starmism.batr.modules.IModule;
 import me.starmism.batr.modules.InvalidModuleException;
 import me.starmism.batr.modules.ModulesManager;
 import me.starmism.batr.modules.ban.BanEntry;
-import me.starmism.batr.modules.comment.CommentEntry;
 import me.starmism.batr.modules.core.PermissionManager.Action;
 import me.starmism.batr.modules.core.importer.*;
 import me.starmism.batr.modules.core.importer.Importer.ImportStatus;
-import me.starmism.batr.modules.kick.KickEntry;
-import me.starmism.batr.modules.mute.MuteEntry;
 import me.starmism.batr.utils.CallbackUtils.ProgressCallback;
 import me.starmism.batr.utils.UtilsKt;
 import net.md_5.bungee.api.ChatColor;
@@ -267,39 +264,7 @@ public class CoreCommand extends BATCommand {
                                         : "&eThe IP &a" + entity + "&e has never been banned."));
                             }
                         }
-                        case "mute" -> {
-                            final List<MuteEntry> mutes = modules.getMuteModule().getMuteData(entity);
-                            if (!mutes.isEmpty()) {
-                                message = lookupFormatter.formatMuteLookup(entity, mutes, page, false);
-                            } else {
-                                message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent((!UtilsKt.validIP(entity))
-                                        ? "&eThe player &a" + entity + "&e has never been muted."
-                                        : "&eThe IP &a" + entity + "&e has never been muted."));
-                            }
-                        }
-                        case "kick" -> {
-                            final List<KickEntry> kicks = modules.getKickModule().getKickData(entity);
-                            if (!kicks.isEmpty()) {
-                                message = lookupFormatter.formatKickLookup(entity, kicks, page, false);
-                            } else {
-                                message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent((!UtilsKt.validIP(entity))
-                                        ? "&eThe player &a" + entity + "&e has never been kicked."
-                                        : "&eThe IP &a" + entity + "&e has never been kicked."));
-                            }
-                        }
-                        case "comment" -> {
-                            final List<CommentEntry> comments = modules.getCommentModule().getComments(entity);
-                            if (!comments.isEmpty()) {
-                                message = lookupFormatter.commentRowLookup(entity, comments, page, false);
-                            } else {
-                                message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent((!UtilsKt.validIP(entity))
-                                        ? "&eThe player &a" + entity + "&e has no comment about him."
-                                        : "&eThe IP &a" + entity + "&e has no comment."));
-                            }
-                        }
+
                         case "ip" -> {
                             EntityEntry pDetails = new EntityEntry(entity);
                             String last_ip = pDetails.getLastIP();
@@ -359,33 +324,6 @@ public class CoreCommand extends BATCommand {
                             } else {
                                 message = new ArrayList<>();
                                 message.add(BATR.convertStringToComponent("&b" + entity + "&e has never performed any operation concerning ban."));
-                            }
-                        }
-                        case "mute" -> {
-                            final List<MuteEntry> mutes = modules.getMuteModule().getManagedMute(entity);
-                            if (!mutes.isEmpty()) {
-                                message = LookupCmd.getLookupFormatter().formatMuteLookup(entity, mutes, page, true);
-                            } else {
-                                message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent("&b" + entity + "&e has never performed any operation concerning mute."));
-                            }
-                        }
-                        case "kick" -> {
-                            final List<KickEntry> kicks = modules.getKickModule().getManagedKick(entity);
-                            if (!kicks.isEmpty()) {
-                                message = LookupCmd.getLookupFormatter().formatKickLookup(entity, kicks, page, true);
-                            } else {
-                                message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent("&b" + entity + "&e has never performed any operation concerning kick."));
-                            }
-                        }
-                        case "comment" -> {
-                            final List<CommentEntry> comments = modules.getCommentModule().getManagedComments(entity);
-                            if (!comments.isEmpty()) {
-                                message = LookupCmd.getLookupFormatter().commentRowLookup(entity, comments, page, true);
-                            } else {
-                                message = new ArrayList<>();
-                                message.add(BATR.convertStringToComponent("&b" + entity + "&e has never performed any operation concerning comment."));
                             }
                         }
                         default -> throw new InvalidModuleException("Module not found or invalid");

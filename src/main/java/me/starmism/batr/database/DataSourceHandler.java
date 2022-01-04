@@ -54,12 +54,14 @@ public class DataSourceHandler {
 
         BATR.getInstance().getLogger().config("Initialization of HikariCP in progress ...");
         ds = new HikariDataSource();
-        ds.setJdbcUrl("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database +
-                "?useLegacyDatetimeCode=false&serverTimezone=" + TimeZone.getDefault().getID());
+        ds.setJdbcUrl("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database);
         ds.setUsername(this.username);
         ds.setPassword(this.password);
         ds.addDataSourceProperty("cachePrepStmts", "true");
         ds.setMaximumPoolSize(8);
+
+        System.out.println(ds.getJdbcUrl());
+        /*
         try {
             final Connection conn = ds.getConnection();
             int intOffset = Calendar.getInstance().getTimeZone().getOffset(Calendar.getInstance().getTimeInMillis()) / 1000;
@@ -78,6 +80,7 @@ public class DataSourceHandler {
                 BATR.getInstance().getLogger().log(Level.SEVERE, e.getMessage(), e);
             }
         }
+        */
         sqlite = false;
     }
 
@@ -196,8 +199,7 @@ public class DataSourceHandler {
                 }
             }
             String backupCmd = "mysqldump -u {user} -p --add-drop-database -r {path} {database} {tables}";
-            final String tables = Joiner.on(' ').join(Arrays.asList(SQLQueries.Ban.table, SQLQueries.Mute.table,
-                    SQLQueries.Kick.table, SQLQueries.Comments.table, SQLQueries.Core.table));
+            final String tables = Joiner.on(' ').join(Arrays.asList(SQLQueries.Ban.table, SQLQueries.Core.table));
             String backupPath = backupFile.getAbsolutePath();
             if (backupPath.contains(" ")) {
                 backupPath = "\"" + backupPath + "\"";

@@ -58,11 +58,6 @@ public class PermissionManager {
         BAN("ban"), BANIP("banip"), TEMPBAN("tempban"), TEMPBANIP("tempbanip"), UNBAN("unban"), UNBANIP("unbanip"), banBroadcast(
                 "ban.broadcast"),
 
-        MUTE("mute"), MUTEIP("muteip"), TEMPMUTE("tempmute"), TEMPMUTEIP("tempmuteip"), UNMUTE("unmute"), UNMUTEIP(
-                "unmuteip"), MUTE_BROADCAST("mute.broadcast"),
-
-        KICK("kick"), WARN("warn"), WARN_BROADCAST("warn.broadcast"), KICK_BROADCAST("kick.broadcast"),
-
         LOOKUP("lookup");
 
         String permission;

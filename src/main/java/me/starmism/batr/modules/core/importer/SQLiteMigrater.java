@@ -35,15 +35,6 @@ public class SQLiteMigrater extends Importer {
             moduleImportQueries.put(SQLQueries.Ban.table, new AbstractMap.SimpleEntry<>(
                     "SELECT * FROM " + SQLQueries.Ban.table + ";",
                     "INSERT INTO " + SQLQueries.Ban.table + " VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?);"));
-            moduleImportQueries.put(SQLQueries.Mute.table, new AbstractMap.SimpleEntry<>(
-                    "SELECT * FROM " + SQLQueries.Mute.table + ";",
-                    "INSERT INTO " + SQLQueries.Mute.table + " VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?);"));
-            moduleImportQueries.put(SQLQueries.Comments.table, new AbstractMap.SimpleEntry<>(
-                    "SELECT * FROM " + SQLQueries.Comments.table + ";",
-                    "INSERT INTO " + SQLQueries.Comments.table + " VALUES(NULL,?,?,?,?,?);"));
-            moduleImportQueries.put(SQLQueries.Kick.table, new AbstractMap.SimpleEntry<>(
-                    "SELECT * FROM " + SQLQueries.Kick.table + ";",
-                    "INSERT INTO " + SQLQueries.Kick.table + " VALUES(NULL,?,?,?,?,?);"));
             moduleImportQueries.put(SQLQueries.Core.table, new AbstractMap.SimpleEntry<>(
                     "SELECT * FROM " + SQLQueries.Core.table + ";",
                     "INSERT INTO " + SQLQueries.Core.table + " VALUES(?,?,?,?,?);"));
@@ -52,8 +43,8 @@ public class SQLiteMigrater extends Importer {
             final DatabaseMetaData dbMetadata = sqliteConn.getMetaData();
             String[] absentTables = new String[5];
             int i = 0;
-            for (final String table : Arrays.asList(SQLQueries.Kick.table, SQLQueries.Mute.table, SQLQueries.Ban.table,
-                    SQLQueries.Core.table, SQLQueries.Comments.table)) {
+            for (final String table : Arrays.asList(SQLQueries.Ban.table,
+                    SQLQueries.Core.table)) {
                 final ResultSet tables = dbMetadata.getTables(null, null, table, null);
                 if (!tables.next()) {
                     absentTables[i] = table;

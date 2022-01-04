@@ -2,10 +2,7 @@ package me.starmism.batr.modules
 
 import me.starmism.batr.BATR
 import me.starmism.batr.modules.ban.Ban
-import me.starmism.batr.modules.comment.Comment
 import me.starmism.batr.modules.core.Core
-import me.starmism.batr.modules.kick.Kick
-import me.starmism.batr.modules.mute.Mute
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
@@ -37,9 +34,6 @@ class ModulesManager {
         // The core module MUST NOT be disabled.
         modules[Core()] = IModule.OFF_STATE
         modules[Ban()] = IModule.OFF_STATE
-        modules[Mute()] = IModule.OFF_STATE
-        modules[Kick()] = IModule.OFF_STATE
-        modules[Comment()] = IModule.OFF_STATE
 
         for (module in modules.keys) {
 
@@ -96,21 +90,6 @@ class ModulesManager {
     val banModule: Ban?
         get() {
             return getModule("ban") as Ban?
-        }
-
-    val muteModule: Mute?
-        get() {
-            return getModule("mute") as Mute?
-        }
-
-    val kickModule: Kick?
-        get() {
-            return getModule("kick") as Kick?
-        }
-
-    val commentModule: Comment?
-        get() {
-            return getModule("comment") as Comment?
         }
 
     fun getModule(name: String): IModule? {

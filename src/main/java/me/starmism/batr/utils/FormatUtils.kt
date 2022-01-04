@@ -30,7 +30,7 @@ import net.md_5.bungee.api.chat.TextComponent
             seconds -= 2678400
         }
         if (months > 0) {
-            item.add("$months months")
+            item.add("$months miesięcy")
         }
         var days = 0
         while (seconds >= 86400) {
@@ -38,7 +38,7 @@ import net.md_5.bungee.api.chat.TextComponent
             seconds -= 86400
         }
         if (days > 0) {
-            item.add("$days days")
+            item.add("$days dni")
         }
         var hours = 0
         while (seconds >= 3600) {
@@ -46,7 +46,7 @@ import net.md_5.bungee.api.chat.TextComponent
             seconds -= 3600
         }
         if (hours > 0) {
-            item.add("$hours hours")
+            item.add("$hours h")
         }
         var mins = 0
         while (seconds >= 60) {
@@ -54,10 +54,10 @@ import net.md_5.bungee.api.chat.TextComponent
             seconds -= 60
         }
         if (mins > 0) {
-            item.add("$mins mins")
+            item.add("$mins min")
         }
         if (seconds > 0) {
-            item.add("$seconds secs")
+            item.add("$seconds s")
         }
         return Joiner.on(", ").join(item)
     }
@@ -68,7 +68,7 @@ import net.md_5.bungee.api.chat.TextComponent
 
         msg.add(TextComponent.fromLegacyText(
             ChatColor.translateAlternateColorCodes('&',
-                "&9 ---- &9Bungee&fAdmin&cTools&9 - &6$helpName&9 - &fHELP &9---- ")
+                "&9 ---- &9Bungee&fDragon&cTools&9 - &6$helpName&9 - &fHELP &9---- ")
         ))
 
         for (cmd in cmds) {

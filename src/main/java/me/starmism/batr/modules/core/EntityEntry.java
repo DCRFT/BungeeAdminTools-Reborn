@@ -5,9 +5,6 @@ import me.starmism.batr.database.DataSourceHandler;
 import me.starmism.batr.database.SQLQueries;
 import me.starmism.batr.modules.ModulesManager;
 import me.starmism.batr.modules.ban.BanEntry;
-import me.starmism.batr.modules.comment.CommentEntry;
-import me.starmism.batr.modules.kick.KickEntry;
-import me.starmism.batr.modules.mute.MuteEntry;
 import me.starmism.batr.utils.UUIDNotFoundException;
 import me.starmism.batr.utils.UtilsKt;
 import net.md_5.bungee.api.ProxyServer;
@@ -28,9 +25,6 @@ public class EntityEntry {
     private final String entity;
 
     private final List<BanEntry> bans = new ArrayList<>();
-    private final List<MuteEntry> mutes = new ArrayList<>();
-    private final List<KickEntry> kicks = new ArrayList<>();
-    private final List<CommentEntry> comments = new ArrayList<>();
     private final List<String> ipUsers = new ArrayList<>();
     private Timestamp firstLogin;
     private Timestamp lastLogin;
@@ -110,16 +104,6 @@ public class EntityEntry {
             if (modules.isLoaded("ban")) {
                 bans.addAll(modules.getBanModule().getBanData(entity));
             }
-            if (modules.isLoaded("mute")) {
-                mutes.addAll(modules.getMuteModule().getMuteData(entity));
-            }
-            // No ip kick
-            if (modules.isLoaded("kick") && ipUsers.isEmpty()) {
-                kicks.addAll(modules.getKickModule().getKickData(entity));
-            }
-            if (modules.isLoaded("comment")) {
-                comments.addAll(modules.getCommentModule().getComments(entity));
-            }
         } catch (final UUIDNotFoundException e) {
             exist = false;
         }
@@ -131,18 +115,6 @@ public class EntityEntry {
 
     public List<BanEntry> getBans() {
         return bans;
-    }
-
-    public List<MuteEntry> getMutes() {
-        return mutes;
-    }
-
-    public List<KickEntry> getKicks() {
-        return kicks;
-    }
-
-    public List<CommentEntry> getComments() {
-        return comments;
     }
 
     public boolean exist() {

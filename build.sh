@@ -5,7 +5,6 @@ set -e
 echo "---- Build Started ----"
 echo ""
 
-cd bungeeadmintools-git
 
 chmod +x ./gradlew
 

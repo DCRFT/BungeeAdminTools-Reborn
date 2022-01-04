@@ -102,16 +102,16 @@ public class BanCommand extends CommandHandler {
 			final CommandSender sender, final String[] args, final boolean confirmedCmd) {
 		String target = args[0];
 		String server = IModule.GLOBAL_SERVER;
-		final String staff = sender.getName();
+
+		final String staff = sender.getName().equalsIgnoreCase("CONSOLE")
+				? "DragonCraft"
+				: sender.getName();
+
 		String reason = IModule.NO_REASON;
 
 		final ProxiedPlayer player = UtilsKt.getPlayer(target);
 
 		UUID pUUID = null;
-		if (BATR.getInstance().getRedis().isRedisEnabled()) {
-		    UUID tempUUID = RedisBungee.getApi().getUuidFromName(target, false);
-		    if (tempUUID != null && RedisBungee.getApi().isPlayerOnline(tempUUID)) pUUID = tempUUID;
-		}
 
 
 		String ip = null;
@@ -169,13 +169,13 @@ public class BanCommand extends CommandHandler {
 
 		checkArgument(!ban.isBan((ip == null) ? target : ip, server), i18n.format("alreadyBan"));
 
+
 		if (ipBan && player != null) {
 			returnedMsg = ban.banIP(player, server, staff, 0, reason);
-		} else if (ipBan && pUUID != null) {
-		        returnedMsg = ban.banRedisIP(pUUID, server, staff, 0, reason);
 		} else {
 			returnedMsg = ban.ban(target, server, staff, 0, reason);
 		}
+
 
 		BATR.broadcast(returnedMsg, Action.banBroadcast.getPermission());
 	}
@@ -251,10 +251,6 @@ public class BanCommand extends CommandHandler {
 		final ProxiedPlayer player = UtilsKt.getPlayer(target);
 		
 		UUID pUUID = null;
-		if (BATR.getInstance().getRedis().isRedisEnabled()) {
-		    UUID tempUUID = RedisBungee.getApi().getUuidFromName(target, false);
-		    if (tempUUID != null && RedisBungee.getApi().isPlayerOnline(tempUUID)) pUUID = tempUUID;
-		}
 
 		String ip = null;
 
@@ -309,8 +305,6 @@ public class BanCommand extends CommandHandler {
 
 		if (ipBan && player != null) {
 			returnedMsg = ban.banIP(player, server, staff, expirationTimestamp, reason);
-		} else if (ipBan && pUUID != null) {
-	        returnedMsg = ban.banRedisIP(pUUID, server, staff, expirationTimestamp, reason);
 		} else {
 			returnedMsg = ban.ban(target , server, staff, expirationTimestamp, reason);
 		}
@@ -381,7 +375,11 @@ public class BanCommand extends CommandHandler {
 			final CommandSender sender, final String[] args, final boolean confirmedCmd) {
 		String target = args[0];
 		String server = IModule.ANY_SERVER;
-		final String staff = sender.getName();
+
+		final String staff = sender.getName().equalsIgnoreCase("CONSOLE")
+				? "DragonCraft"
+				: sender.getName();;
+
 		String reason = IModule.NO_REASON;
 
 		String ip = null;

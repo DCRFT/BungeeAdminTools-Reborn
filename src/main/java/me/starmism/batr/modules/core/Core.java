@@ -142,18 +142,8 @@ public class Core implements IModule, Listener {
     }
 
     public static String getPlayerIP(final String pName) {
-        if (BATR.getInstance().getRedis().isRedisEnabled()) {
-            try {
-                final UUID pUUID = RedisBungee.getApi().getUuidFromName(pName, true);
-                if (pUUID != null && RedisBungee.getApi().isPlayerOnline(pUUID))
-                    return RedisBungee.getApi().getPlayerIp(pUUID).getHostAddress();
-            } catch (Exception exp) {
-                exp.printStackTrace();
-            }
-        } else {
             final ProxiedPlayer player = ProxyServer.getInstance().getPlayer(pName);
             if (player != null) return UtilsKt.getPlayerIP(player);
-        }
 
         PreparedStatement statement = null;
         ResultSet resultSet = null;

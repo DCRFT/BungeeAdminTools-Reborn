@@ -2,9 +2,6 @@ package me.starmism.batr.modules;
 
 import me.starmism.batr.BATR;
 import me.starmism.batr.modules.ban.BanConfig;
-import me.starmism.batr.modules.comment.CommentConfig;
-import me.starmism.batr.modules.kick.KickConfig;
-import me.starmism.batr.modules.mute.MuteConfig;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -47,15 +44,7 @@ public abstract class CommandHandler {
 
         // Sort the commands list and remove unused command
         final List<String> enabledCmds;
-        if (module instanceof BanConfig) {
             enabledCmds = sortCommandMap(module.getConfig().get(BanConfig.COMMANDS));
-        } else if (module instanceof MuteConfig) {
-            enabledCmds = sortCommandMap(module.getConfig().get(MuteConfig.COMMANDS));
-        } else if (module instanceof CommentConfig) {
-            enabledCmds = sortCommandMap(module.getConfig().get(CommentConfig.COMMANDS));
-        } else {
-            enabledCmds = sortCommandMap(module.getConfig().get(KickConfig.COMMANDS));
-        }
         commands.removeIf(cmd -> !enabledCmds.contains(cmd.getName()));
     }
 

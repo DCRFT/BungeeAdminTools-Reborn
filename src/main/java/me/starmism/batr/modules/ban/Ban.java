@@ -98,12 +98,12 @@ public class Ban implements IModule, Listener {
                     : Collections.singletonList(GLOBAL_SERVER);
             for (final String server : serversToCheck) {
                 if (isBan(player, server)) {
-                    if (server.equals(player.getPendingConnection().getListener().getDefaultServer()) || server.equals(GLOBAL_SERVER)) {
+                    if (server.equals(player.getPendingConnection().getListener().getServerPriority().get(0)) || server.equals(GLOBAL_SERVER)) {
                         player.disconnect(getBanMessage(player.getPendingConnection(), server));
                         continue;
                     }
                     player.sendMessage(getBanMessage(player.getPendingConnection(), server));
-                    player.connect(ProxyServer.getInstance().getServerInfo(player.getPendingConnection().getListener().getDefaultServer()));
+                    player.connect(ProxyServer.getInstance().getServerInfo(player.getPendingConnection().getListener().getServerPriority().get(0)));
                 }
             }
         }
@@ -238,11 +238,12 @@ public class Ban implements IModule, Listener {
      * @param reason              | optional
      * @return
      */
-    public String ban(final String bannedEntity, final String server, final String staff,
+    public String ban(String bannedEntity, final String server, final String staff,
                       final long expirationTimestamp, final String reason) {
         try (Connection conn = BATR.getConnection()) {
             // If the bannedEntity is an ip
             if (UtilsKt.validIP(bannedEntity)) {
+                System.out.println("tescik");
 
 				final PreparedStatement statement = conn.prepareStatement(SQLQueries.Ban.createBanIP);
                 statement.setString(1, bannedEntity);
@@ -259,14 +260,7 @@ public class Ban implements IModule, Listener {
                     }
                 }
 
-                if (BATR.getInstance().getRedis().isRedisEnabled()) {
-                    for (final UUID pUUID : RedisBungee.getApi().getPlayersOnline()) {
-                        if (RedisBungee.getApi().getPlayerIp(pUUID).toString().equals(bannedEntity) && (GLOBAL_SERVER.equals(server) || server.equalsIgnoreCase(RedisBungee.getApi().getServerFor(pUUID).getName()))) {
-                            BATR.getInstance().getRedis().sendGKickPlayer(pUUID, i18n.format("wasBannedNotif", new String[]{reason}));
-                        }
-                    }
-                }
-
+                bannedEntity = "Ukryte IP";
 			}
 
             // Otherwise it's a player
@@ -287,12 +281,6 @@ public class Ban implements IModule, Listener {
                 if (player != null
                         && (server.equals(GLOBAL_SERVER) || player.getServer().getInfo().getName().equalsIgnoreCase(server))) {
                     BATR.kick(player, i18n.format("wasBannedNotif", new String[]{reason}));
-                } else if (BATR.getInstance().getRedis().isRedisEnabled()) {
-                    UUID pUUID = RedisBungee.getApi().getUuidFromName(bannedEntity);
-                    if (RedisBungee.getApi().isPlayerOnline(pUUID)
-                            && ((server.equals(GLOBAL_SERVER) || RedisBungee.getApi().getServerFor(pUUID).getName().equalsIgnoreCase(server)))) {
-                        BATR.getInstance().getRedis().sendGKickPlayer(pUUID, i18n.format("wasBannedNotif", new String[]{reason}));
-                    }
                 }
 
 			}
@@ -319,19 +307,9 @@ public class Ban implements IModule, Listener {
     public String banIP(final ProxiedPlayer player, final String server, final String staff,
                         final long expirationTimestamp, final String reason) {
         ban(UtilsKt.getPlayerIP(player), server, staff, expirationTimestamp, reason);
-        return i18n.format("banBroadcast", new String[]{player.getName() + "'s IP", staff, server, reason});
+        return i18n.format("banBroadcast", new String[]{"Ukryte IP", staff, server, reason});
     }
 
-    public String banRedisIP(final UUID pUUID, final String server, final String staff,
-                             final long expirationTimestamp, final String reason) {
-        if (BATR.getInstance().getRedis().isRedisEnabled() && RedisBungee.getApi().isPlayerOnline(pUUID)) {
-            ban(RedisBungee.getApi().getPlayerIp(pUUID).getHostAddress(), server, staff, expirationTimestamp, reason);
-            return i18n.format("banBroadcast", new String[]{RedisBungee.getApi().getNameFromUuid(pUUID) + "'s IP", staff, server, reason});
-        } else {
-            return null;
-        }
-
-    }
 
     /**
      * Unban an entity (player or ip)
@@ -342,7 +320,7 @@ public class Ban implements IModule, Listener {
      * @param staff
      * @param reason
      */
-    public String unBan(final String bannedEntity, final String server, final String staff, final String reason) {
+    public String unBan(String bannedEntity, final String server, final String staff, final String reason) {
         PreparedStatement statement = null;
         try (Connection conn = BATR.getConnection()) {
             // If the bannedEntity is an ip
@@ -363,8 +341,8 @@ public class Ban implements IModule, Listener {
                     statement.setString(4, server);
                 }
                 statement.executeUpdate();
+                bannedEntity = "Ukryte IP";
 
-                return i18n.format("unbanBroadcast", new String[]{bannedEntity, staff, server, reason});
             }
 
             // Otherwise it's a player
@@ -387,8 +365,8 @@ public class Ban implements IModule, Listener {
                 }
                 statement.executeUpdate();
 
-                return i18n.format("unbanBroadcast", new String[]{bannedEntity, staff, server, reason});
             }
+            return i18n.format("unbanBroadcast", new String[]{bannedEntity, staff, server, reason});
         } catch (final SQLException e) {
             return DataSourceHandler.handleException(e);
         } finally {
@@ -547,7 +525,7 @@ public class Ban implements IModule, Listener {
         final String target = e.getTarget().getName();
 
         if (isBan(player, target)) {
-            if (target.equals(player.getPendingConnection().getListener().getDefaultServer())) {
+            if (target.equals(player.getPendingConnection().getListener().getServerPriority().get(0))) {
                 // If it's player's join server kick him
                 if (e.getPlayer().getServer() == null) {
                     e.setCancelled(true);
@@ -563,7 +541,7 @@ public class Ban implements IModule, Listener {
             player.sendMessage(getBanMessage(player.getPendingConnection(), target));
             if (player.getServer() == null) {
                 player.connect(ProxyServer.getInstance().getServerInfo(
-                        player.getPendingConnection().getListener().getDefaultServer()));
+                        player.getPendingConnection().getListener().getServerPriority().get(0)));
             }
             e.setCancelled(true);
         }
