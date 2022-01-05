@@ -59,7 +59,6 @@ public class DataSourceHandler {
         ds.addDataSourceProperty("cachePrepStmts", "true");
         ds.setMaximumPoolSize(8);
 
-        System.out.println(ds.getJdbcUrl());
         /*
         try {
             final Connection conn = ds.getConnection();
